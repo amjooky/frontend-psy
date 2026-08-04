@@ -92,7 +92,10 @@ function ConsultationRoomContent() {
               router.push('/dashboard/patient/appointments');
             });
           } catch (err: any) {
-            if (!disposed) setError('Impossible de démarrer la vidéo. Vérifiez votre caméra et microphone, puis réessayez.');
+            if (!disposed) {
+              setStatus('error');
+              setError('Impossible de démarrer la vidéo. Vérifiez votre caméra et microphone, puis réessayez.');
+            }
             console.error('Jitsi init error:', err);
           }
         };
@@ -107,6 +110,7 @@ function ConsultationRoomContent() {
           script.onload = initJitsi;
           script.onerror = () => {
             if (!disposed) {
+              setStatus('error');
               setError(
                 `Impossible de charger le module vidéo depuis ${domain}.\n\nOuvrez https://${domain} dans un nouvel onglet, acceptez le certificat, puis revenez et actualisez la page.`
               );
@@ -116,14 +120,15 @@ function ConsultationRoomContent() {
         }
       } catch (err: any) {
         if (!disposed) {
-          const status = err?.response?.status;
+          const httpStatus = err?.response?.status;
           let msg = 'Une erreur est survenue. Veuillez réessayer.';
-          if (status === 403) msg = 'Accès refusé. Vous n\'êtes pas autorisé à rejoindre cette consultation.';
-          else if (status === 404) msg = 'Cette consultation est introuvable. Vérifiez que le lien est correct.';
-          else if (status === 409) msg = 'La salle est déjà active. Rafraîchissez la page pour rejoindre.';
-          else if (status === 400) msg = 'Cette consultation n\'est pas encore disponible ou a expiré.';
-          else if (status === 401) msg = 'Session expirée. Veuillez vous reconnecter.';
+          if (httpStatus === 403) msg = 'Accès refusé. Vous n\'êtes pas autorisé à rejoindre cette consultation.';
+          else if (httpStatus === 404) msg = 'Cette consultation est introuvable. Vérifiez que le lien est correct.';
+          else if (httpStatus === 409) msg = 'La salle est déjà active. Rafraîchissez la page pour rejoindre.';
+          else if (httpStatus === 400) msg = 'Cette consultation n\'est pas encore disponible ou a expiré.';
+          else if (httpStatus === 401) msg = 'Session expirée. Veuillez vous reconnecter.';
           else if (err?.response?.data?.message) msg = err.response.data.message;
+          setStatus('error');
           setError(msg);
         }
       }
