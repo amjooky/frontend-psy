@@ -4,7 +4,7 @@ import React from 'react';
 import AdminSidebarLayout from '@/components/layout/AdminSidebarLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { DollarSign, X, AlertCircle } from 'lucide-react';
+import { DollarSign, X, AlertCircle, Download, ExternalLink } from 'lucide-react';
 
 // Safely convert a Prisma Decimal object or raw number/string to a display string
 function safeDecimal(val: any, fallback = '—'): string {
@@ -28,15 +28,18 @@ export default function AdminPayments() {
   const { data: invoices, isLoading } = useQuery({
     queryKey: ['admin-invoices'],
     queryFn: async () => {
-      // In a real application we fetch invoices from endpoint, using appointments endpoint as fallback
-      const res = await api.get('/appointments');
-      return res.data?.data?.data || [];
+      const res = await api.get('/payments/admin/all-invoices');
+      return res.data?.data || res.data || [];
     },
   });
 
   const refundMutation = useMutation({
-    mutationFn: async (appointmentId: string) => {
-      return api.post('/payments/refund', { appointmentId });
+    mutationFn: async (invoice: any) => {
+      return api.post('/payments/refund', {
+        paymentId: invoice.paymentId,
+        amount: Number(invoice.total),
+        reason: 'Admin refund requested from billing console.',
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-invoices'] });
@@ -69,26 +72,47 @@ export default function AdminPayments() {
                     <DollarSign className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#1B2559] text-base">Transaction for Appt: <span className="font-mono text-slate-700">{inv.id.slice(0, 8)}...</span></h4>
+                    <h4 className="font-bold text-[#1B2559] text-base">{inv.invoiceNumber}</h4>
                     <p className="text-xs text-slate-500 mt-2 font-medium flex items-center gap-3">
-                      <span>Patient: {inv.patient?.isAnonymous ? 'Anonymous' : `${inv.patient?.firstName || ''} ${inv.patient?.lastName || ''}`}</span>
+                      <span>Patient: {inv.patient?.isAnonymous ? inv.patient?.anonymousName || 'Anonymous' : `${inv.patient?.firstName || ''} ${inv.patient?.lastName || ''}`}</span>
                       <span>·</span>
-                      <span>Amount: <span className="font-bold text-slate-800">{safeDecimal(inv.price, '80')} TND</span></span>
+                      <span>Amount: <span className="font-bold text-slate-800">{safeDecimal(inv.total, '80')} {inv.currency}</span></span>
+                      <span>·</span>
+                      <span>Dr. {inv.appointment?.psychologist?.firstName} {inv.appointment?.psychologist?.lastName}</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase border ${
-                    inv.status === 'CONFIRMED' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                    inv.payment?.status === 'COMPLETED' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
                     'bg-slate-50 border border-slate-200 text-slate-500'
                   }`}>
-                    {inv.status === 'CONFIRMED' ? 'PAID' : 'PENDING'}
+                    {inv.payment?.status || 'PENDING'}
                   </span>
 
-                  {inv.status === 'CONFIRMED' && (
+                  {inv.pdfUrl && (
+                    <a href={inv.pdfUrl} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold flex items-center gap-1.5 text-slate-700 hover:bg-slate-50">
+                      <ExternalLink className="w-4 h-4" />
+                      PDF
+                    </a>
+                  )}
+
+                  <button
+                    onClick={async () => {
+                      const res = await api.get(`/payments/invoices/${inv.id}/pdf`);
+                      const url = res.data?.data?.url || res.data?.url;
+                      if (url) window.open(url, '_blank');
+                    }}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold flex items-center gap-1.5 text-slate-700 hover:bg-slate-50"
+                  >
+                    <Download className="w-4 h-4" />
+                    Generate
+                  </button>
+
+                  {inv.payment?.status === 'COMPLETED' && (
                     <button
-                      onClick={() => refundMutation.mutate(inv.id)}
+                      onClick={() => refundMutation.mutate(inv)}
                       disabled={refundMutation.isPending}
                       className="px-4 py-2 rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-600 hover:text-white text-rose-600 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
                     >

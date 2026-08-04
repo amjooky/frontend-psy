@@ -5,8 +5,9 @@ import AdminSidebarLayout from '@/components/layout/AdminSidebarLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import {
-  Users, Award, Check, ShieldAlert, Shield, Trash2,
-  AlertCircle, Search, UserCheck, UserX, RefreshCw,
+  Users, Award, Check, ShieldAlert, Trash2,
+  AlertCircle, Search, UserCheck, UserX,
+  ChevronDown, ChevronUp, ExternalLink,
 } from 'lucide-react';
 
 // ─── Confirmation modal ────────────────────────────────────────────────────
@@ -64,6 +65,7 @@ export default function AdminUserControl() {
     userId: string;
     name: string;
   } | null>(null);
+  const [expandedPsychologistId, setExpandedPsychologistId] = useState<string | null>(null);
 
   // ─── Fetch psychologists ───────────────────────────────────────
   const { data: psyData, isLoading: psyLoading } = useQuery({
@@ -102,6 +104,12 @@ export default function AdminUserControl() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-psychologists'] }),
   });
 
+  const certificateMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'VERIFIED' | 'REJECTED' }) =>
+      api.patch(`/psychologists/admin/certificates/${id}/status`, { status }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-psychologists'] }),
+  });
+
   const banMutation = useMutation({
     mutationFn: (id: string) => api.patch(`/admin/users/${id}/ban`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-users'] }); setConfirm(null); },
@@ -137,8 +145,6 @@ export default function AdminUserControl() {
     const name = `${p.firstName || ''} ${p.lastName || ''} ${p.licenseNumber || ''}`.toLowerCase();
     return name.includes(search.toLowerCase());
   });
-
-  const isActionPending = banMutation.isPending || activateMutation.isPending || deleteMutation.isPending;
 
   return (
     <AdminSidebarLayout>
@@ -309,60 +315,111 @@ export default function AdminUserControl() {
               {filteredPsy.map((psy: any) => (
                 <div
                   key={psy.id}
-                  className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
+                  className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-6"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                      <Award className="w-6 h-6" />
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                        <Award className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-[#1B2559] text-base">Dr. {psy.firstName} {psy.lastName}</h4>
+                        <p className="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-2 items-center">
+                          <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200 font-mono text-slate-700">
+                            License: {psy.licenseNumber}
+                          </span>
+                          <span className="text-slate-400 italic font-light">
+                            {psy.biography?.slice(0, 80) || 'No bio'}...
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-[#1B2559] text-base">Dr. {psy.firstName} {psy.lastName}</h4>
-                      <p className="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-2 items-center">
-                        <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200 font-mono text-slate-700">
-                          License: {psy.licenseNumber}
-                        </span>
-                        <span className="text-slate-400 italic font-light">
-                          {psy.biography?.slice(0, 80) || 'No bio'}...
-                        </span>
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-3">
-                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase border ${
-                      psy.status === 'ACTIVE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                      psy.status === 'PENDING_VERIFICATION' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-                      'bg-rose-50 border-rose-200 text-rose-700'
-                    }`}>
-                      {psy.status === 'PENDING_VERIFICATION' ? 'Pending' : psy.status}
-                    </span>
-
-                    {psy.status === 'PENDING_VERIFICATION' && (
-                      <button
-                        onClick={() => verifyMutation.mutate(psy.id)}
-                        disabled={verifyMutation.isPending}
-                        className="px-4 py-2 rounded-xl bg-[#2EC4B6] hover:bg-[#2EC4B6]/80 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
-                      >
-                        <Check className="w-4 h-4" />
-                        Verify
-                      </button>
-                    )}
-
-                    {psy.status !== 'SUSPENDED' ? (
-                      <button
-                        onClick={() => suspendPsyMutation.mutate(psy.id)}
-                        disabled={suspendPsyMutation.isPending}
-                        className="px-4 py-2 rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-600 hover:text-white text-rose-600 text-xs font-bold flex items-center gap-1.5 transition-all"
-                      >
-                        <ShieldAlert className="w-4 h-4" />
-                        Suspend
-                      </button>
-                    ) : (
-                      <span className="text-xs text-slate-400 font-semibold italic bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                        Suspended
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase border ${
+                        psy.status === 'ACTIVE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                        psy.status === 'PENDING_VERIFICATION' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                        'bg-rose-50 border-rose-200 text-rose-700'
+                      }`}>
+                        {psy.status === 'PENDING_VERIFICATION' ? 'Pending' : psy.status}
                       </span>
-                    )}
+
+                      {psy.status === 'PENDING_VERIFICATION' && (
+                        <button
+                          onClick={() => verifyMutation.mutate(psy.id)}
+                          disabled={verifyMutation.isPending}
+                          className="px-4 py-2 rounded-xl bg-[#2EC4B6] hover:bg-[#2EC4B6]/80 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                        >
+                          <Check className="w-4 h-4" />
+                          Verify
+                        </button>
+                      )}
+
+                      {psy.status !== 'SUSPENDED' ? (
+                        <button
+                          onClick={() => suspendPsyMutation.mutate(psy.id)}
+                          disabled={suspendPsyMutation.isPending}
+                          className="px-4 py-2 rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-600 hover:text-white text-rose-600 text-xs font-bold flex items-center gap-1.5 transition-all"
+                        >
+                          <ShieldAlert className="w-4 h-4" />
+                          Suspend
+                        </button>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-semibold italic bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+                          Suspended
+                        </span>
+                      )}
+
+                      <button
+                        onClick={() => setExpandedPsychologistId(expandedPsychologistId === psy.id ? null : psy.id)}
+                        className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold flex items-center gap-1.5 text-slate-700"
+                      >
+                        Certificats
+                        {expandedPsychologistId === psy.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
+
+                  {expandedPsychologistId === psy.id && (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                      <div className="grid gap-3">
+                        {(psy.certificates || []).length === 0 ? (
+                          <p className="text-sm text-slate-500">Aucun certificat televerse.</p>
+                        ) : (
+                          psy.certificates.map((cert: any) => (
+                            <div key={cert.id} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
+                              <div>
+                                <h5 className="font-semibold text-[#1B2559]">{cert.title}</h5>
+                                <p className="text-xs text-slate-500">{cert.issuer}</p>
+                                <p className="text-[11px] text-slate-400 mt-1">Statut: {cert.status}</p>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-2">
+                                {cert.fileUrl && (
+                                  <a href={cert.fileUrl} target="_blank" rel="noreferrer" className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold flex items-center gap-1.5 text-slate-700">
+                                    <ExternalLink className="w-4 h-4" />
+                                    Fichier
+                                  </a>
+                                )}
+                                <button
+                                  onClick={() => certificateMutation.mutate({ id: cert.id, status: 'VERIFIED' })}
+                                  className="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => certificateMutation.mutate({ id: cert.id, status: 'REJECTED' })}
+                                  className="px-3 py-2 rounded-xl bg-rose-50 border border-rose-100 text-xs font-bold text-rose-700"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

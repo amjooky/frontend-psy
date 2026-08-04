@@ -13,7 +13,8 @@ import {
   LogOut,
   ShieldAlert,
   Search,
-  Loader
+  Loader,
+  Receipt
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications, PATIENT_MODULE_TYPES } from '@/hooks/useNotifications';
@@ -56,6 +57,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     { href: '/psychologists', label: 'Trouver un Psychologue', icon: <Search className="w-5 h-5" /> },
     { href: '/dashboard/patient/appointments', label: 'Rendez-vous', icon: <Calendar className="w-5 h-5" /> },
     { href: '/dashboard/patient/chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
+    { href: '/dashboard/patient/billing', label: 'Factures & Paiements', icon: <Receipt className="w-5 h-5" /> },
     { href: '/dashboard/patient/documents', label: 'Documents', icon: <FileText className="w-5 h-5" /> },
     { href: '/dashboard/patient/support', label: 'Support', icon: <ShieldAlert className="w-5 h-5" /> },
     { href: '/dashboard/patient/profile', label: 'Profil', icon: <User className="w-5 h-5" /> },

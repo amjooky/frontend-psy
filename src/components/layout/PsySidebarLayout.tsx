@@ -56,6 +56,7 @@ export default function PsySidebarLayout({ children }: SidebarLayoutProps) {
     { href: '/dashboard/psychologist/appointments', label: 'Rendez-vous', icon: <Calendar className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/patients', label: 'Historique patients', icon: <Users className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/availability', label: 'Disponibilités', icon: <Clock className="w-5 h-5" /> },
+    { href: '/dashboard/psychologist/availability/exceptions', label: 'Exceptions', icon: <Clock className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/certificates', label: 'Diplômes & Certifs', icon: <Award className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/profile', label: 'Profil & Tarifs', icon: <Settings className="w-5 h-5" /> },

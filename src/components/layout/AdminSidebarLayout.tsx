@@ -11,7 +11,8 @@ import {
   LifeBuoy,
   LogOut,
   Settings,
-  Loader
+  Loader,
+  MessageSquareQuote
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications, ADMIN_MODULE_TYPES } from '@/hooks/useNotifications';
@@ -53,6 +54,7 @@ export default function AdminSidebarLayout({ children }: SidebarLayoutProps) {
     { href: '/dashboard/admin', label: 'Console Admin', icon: <Activity className="w-5 h-5" /> },
     { href: '/dashboard/admin/users', label: 'Contrôle Utilisateurs', icon: <Users className="w-5 h-5" /> },
     { href: '/dashboard/admin/payments', label: 'Paiements & Flux', icon: <DollarSign className="w-5 h-5" /> },
+    { href: '/dashboard/admin/reviews', label: 'Moderation Avis', icon: <MessageSquareQuote className="w-5 h-5" /> },
     { href: '/dashboard/admin/tickets', label: 'Tickets Support', icon: <LifeBuoy className="w-5 h-5" /> },
     { href: '/dashboard/admin/audit', label: "Logs d'Audit", icon: <Settings className="w-5 h-5" /> },
   ];
