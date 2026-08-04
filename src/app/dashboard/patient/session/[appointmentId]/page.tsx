@@ -20,6 +20,7 @@ function ConsultationRoomContent() {
   const apiRef = useRef<any>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     if (!appointmentId) return;
@@ -137,7 +138,7 @@ function ConsultationRoomContent() {
         apiRef.current = null;
       }
     };
-  }, [appointmentId, router]);
+  }, [appointmentId, router, retryKey]);
 
   if (status === 'error' || error) {
     return (
@@ -149,7 +150,7 @@ function ConsultationRoomContent() {
         <p className="text-slate-400 text-sm max-w-md leading-relaxed whitespace-pre-line mb-6">{error}</p>
         <div className="flex gap-3">
           <button
-            onClick={() => { setError(null); setStatus('loading'); start(); }}
+            onClick={() => { setError(null); setStatus('loading'); setRetryKey((k) => k + 1); }}
             className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all"
           >
             Réessayer
