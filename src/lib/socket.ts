@@ -10,17 +10,16 @@ let socket: Socket | null = null;
 export function getSocket(userId: string): Socket {
   if (socket && socket.connected) return socket;
 
-  let host = 'http://localhost:3001';
+  let host = 'https://backend-psy-upv7.onrender.com';
   if (typeof window !== 'undefined') {
-    if (window.location.hostname.includes('educanet.pro')) {
+    if (window.location.hostname.includes('vercel.app')) {
+      host = 'https://backend-psy-upv7.onrender.com';
+    } else if (window.location.hostname.includes('educanet.pro')) {
       host = 'https://be-psy.educanet.pro';
     } else {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://backend-psy-upv7.onrender.com/api/v1';
       host = apiBase.replace(/\/api\/v1\/?$/, '');
     }
-  } else {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-    host = apiBase.replace(/\/api\/v1\/?$/, '');
   }
 
   socket = io(`${host}/chat`, {
