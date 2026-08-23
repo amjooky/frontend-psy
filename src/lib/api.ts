@@ -1,13 +1,19 @@
 import axios from 'axios';
 
-// Dynamically resolve API URL at runtime to prevent Next.js build caching issues
+// Dynamically resolve API URL at runtime to guarantee live Render backend connection
 const getApiBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
   if (typeof window !== 'undefined') {
+    if (window.location.hostname.includes('vercel.app')) {
+      return 'https://backend-psy-upv7.onrender.com/api/v1';
+    }
     if (window.location.hostname.includes('educanet.pro')) {
       return 'https://be-psy.educanet.pro/api/v1';
     }
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+  return process.env.NEXT_PUBLIC_API_URL || 'https://backend-psy-upv7.onrender.com/api/v1';
 };
 
 const api = axios.create({
@@ -18,10 +24,11 @@ const api = axios.create({
   withCredentials: true, // Needed for cookie session rotation
 });
 
-
 // Auto Inject Auth Bearer tokens on each API trigger if exists in localStorage
 api.interceptors.request.use(
   (config) => {
+    // Ensure baseURL is always synchronized
+    config.baseURL = getApiBaseUrl();
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token && config.headers) {
@@ -43,7 +50,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const res = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
+          const res = await axios.post(`${getApiBaseUrl()}/auth/refresh`, {
             refreshToken,
           });
           if (res.data?.data?.accessToken) {
