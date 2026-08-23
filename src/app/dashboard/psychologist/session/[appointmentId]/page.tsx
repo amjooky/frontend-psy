@@ -47,7 +47,7 @@ function PsyConsultationRoomContent() {
           }
 
           try {
-            const jitsiApi = new window.JitsiMeetExternalAPI(domain || 'meet.jit.si', {
+            const jitsiApi = new window.JitsiMeetExternalAPI(domain || 'meet.ffmuc.net', {
               roomName,
               jwt: token || undefined,
               userInfo: userInfo || undefined,
@@ -113,13 +113,13 @@ function PsyConsultationRoomContent() {
         } else {
           const script = document.createElement('script');
           script.id = scriptId;
-          script.src = `https://${domain || 'meet.jit.si'}/external_api.js`;
+          script.src = `https://${domain || 'meet.ffmuc.net'}/external_api.js`;
           script.async = true;
           script.onload = initJitsi;
           script.onerror = () => {
             if (!disposed) {
               setError(
-                `Impossible de charger le module vidéo depuis ${domain || 'meet.jit.si'}. Vérifiez votre connexion Internet et réessayez.`
+                `Impossible de charger le module vidéo depuis ${domain || 'meet.ffmuc.net'}. Vérifiez votre connexion Internet et réessayez.`
               );
             }
           };
