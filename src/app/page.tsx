@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +47,12 @@ const staggerContainer = {
 };
 
 export default function LandingPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/login');
+  }, [router]);
+
   const { language, setLanguage, t, dir } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
