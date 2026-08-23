@@ -5,19 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  LayoutDashboard,
   Calendar,
+  Clock,
   MessageSquare,
+  Award,
   Settings,
   LogOut,
-  Clock,
-  TrendingUp,
-  Award,
-  Loader,
-  Users,
+  Loader
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications, PSY_MODULE_TYPES } from '@/hooks/useNotifications';
 import NotificationBell from '@/components/ui/NotificationBell';
+import { MobilePsyBottomNav } from './MobilePsyBottomNav';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -52,11 +52,9 @@ export default function PsySidebarLayout({ children }: SidebarLayoutProps) {
   }
 
   const links = [
-    { href: '/dashboard/psychologist', label: "Vue d'ensemble", icon: <TrendingUp className="w-5 h-5" /> },
+    { href: '/dashboard/psychologist', label: "Vue d'ensemble", icon: <LayoutDashboard className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/appointments', label: 'Rendez-vous', icon: <Calendar className="w-5 h-5" /> },
-    { href: '/dashboard/psychologist/patients', label: 'Historique patients', icon: <Users className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/availability', label: 'Disponibilités', icon: <Clock className="w-5 h-5" /> },
-    { href: '/dashboard/psychologist/availability/exceptions', label: 'Exceptions', icon: <Clock className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/certificates', label: 'Diplômes & Certifs', icon: <Award className="w-5 h-5" /> },
     { href: '/dashboard/psychologist/profile', label: 'Profil & Tarifs', icon: <Settings className="w-5 h-5" /> },
@@ -64,7 +62,7 @@ export default function PsySidebarLayout({ children }: SidebarLayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex font-outfit">
-      {/* LEFT SIDEBAR */}
+      {/* LEFT SIDEBAR (Desktop) */}
       <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
           <div className="h-20 px-6 border-b border-slate-200 flex items-center">
@@ -123,12 +121,17 @@ export default function PsySidebarLayout({ children }: SidebarLayoutProps) {
 
       {/* MAIN LAYOUT SHELL */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 border-b border-slate-200 px-6 md:px-8 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-30 shadow-sm">
-          <h1 className="text-lg font-bold text-[#1B2559] md:text-xl">
-            {links.find((l) => l.href === pathname)?.label || "Vue d'ensemble"}
-          </h1>
-
+        <header className="h-16 md:h-20 border-b border-slate-200 px-4 md:px-8 flex items-center justify-between bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-3">
+            <Link href="/" className="md:hidden flex items-center shrink-0">
+              <Image src="/logo.png" alt="MonPsy" width={85} height={26} priority style={{ width: 'auto', height: 'auto' }} className="object-contain" />
+            </Link>
+            <h1 className="text-base md:text-xl font-bold text-[#1B2559] truncate">
+              {links.find((l) => l.href === pathname)?.label || "Espace Thérapeute"}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-2">
             <NotificationBell
               notifications={notifications}
               unreadCount={unreadCount}
@@ -140,10 +143,14 @@ export default function PsySidebarLayout({ children }: SidebarLayoutProps) {
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar bg-slate-50/50">
+        {/* Responsive main content with safe padding for mobile bottom bar */}
+        <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto custom-scrollbar bg-slate-50/50">
           {children}
         </main>
       </div>
+
+      {/* NATIVE MOBILE BOTTOM NAVIGATION */}
+      <MobilePsyBottomNav />
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications, PATIENT_MODULE_TYPES } from '@/hooks/useNotifications';
 import NotificationBell from '@/components/ui/NotificationBell';
+import { MobilePatientBottomNav } from './MobilePatientBottomNav';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -65,7 +66,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex font-outfit">
-      {/* LEFT SIDEBAR */}
+      {/* LEFT SIDEBAR (Desktop) */}
       <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden md:flex">
         <div className="flex flex-col">
           <div className="h-20 px-6 border-b border-slate-200 flex items-center">
@@ -124,17 +125,22 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
       {/* MAIN LAYOUT SHELL */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 border-b border-slate-200 px-6 md:px-8 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-30 shadow-sm">
-          <h1 className="text-lg font-bold text-[#1B2559] md:text-xl">
-            {links.find((l) => l.href === pathname)?.label ||
-             ({
-               '/dashboard/patient/payment': 'Paiement',
-               '/dashboard/patient/session': 'Session Active',
-             } as Record<string, string>)[pathname] ||
-             "Vue d'ensemble"}
-          </h1>
-
+        <header className="h-16 md:h-20 border-b border-slate-200 px-4 md:px-8 flex items-center justify-between bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-3">
+            <Link href="/" className="md:hidden flex items-center shrink-0">
+              <Image src="/logo.png" alt="MonPsy" width={85} height={26} priority style={{ width: 'auto', height: 'auto' }} className="object-contain" />
+            </Link>
+            <h1 className="text-base md:text-xl font-bold text-[#1B2559] truncate">
+              {links.find((l) => l.href === pathname)?.label ||
+               ({
+                 '/dashboard/patient/payment': 'Paiement',
+                 '/dashboard/patient/session': 'Session Active',
+               } as Record<string, string>)[pathname] ||
+               "Espace Patient"}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-2">
             <NotificationBell
               notifications={notifications}
               unreadCount={unreadCount}
@@ -146,10 +152,14 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar bg-slate-50/50">
+        {/* Responsive main content with safe padding for mobile bottom bar */}
+        <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto custom-scrollbar bg-slate-50/50">
           {children}
         </main>
       </div>
+
+      {/* NATIVE MOBILE BOTTOM NAVIGATION */}
+      <MobilePatientBottomNav />
     </div>
   );
 }
