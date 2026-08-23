@@ -31,7 +31,7 @@ function PsyConsultationRoomContent() {
       try {
         // 1. Get meeting credentials from backend (unpacked via NestJS TransformInterceptor format res.data.data)
         const res = await api.get(`/consultations/appointments/${appointmentId}/access`);
-        const { roomName, token, domain } = res.data?.data || res.data || {};
+        const { roomName, token, domain, userInfo } = res.data?.data || res.data || {};
 
         if (disposed) return;
 
@@ -47,9 +47,10 @@ function PsyConsultationRoomContent() {
           }
 
           try {
-            const jitsiApi = new window.JitsiMeetExternalAPI(domain, {
+            const jitsiApi = new window.JitsiMeetExternalAPI(domain || 'meet.jit.si', {
               roomName,
-              jwt: token,
+              jwt: token || undefined,
+              userInfo: userInfo || undefined,
               width: '100%',
               height: '100%',
               parentNode: containerRef.current,
@@ -58,11 +59,16 @@ function PsyConsultationRoomContent() {
                 startWithVideoMuted: false,
                 prejoinPageEnabled: false,
                 disableDeepLinking: true,
-                disableThirdPartyRequests: true,
+                enableLobby: true,
+                lobby: {
+                  enabled: true,
+                  autoKnock: true,
+                  enableChat: true,
+                },
                 toolbarButtons: [
                   'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
                   'fodeviceselection', 'hangup', 'profile', 'chat',
-                  'videoquality', 'tileview', 'mute-everyone',
+                  'videoquality', 'tileview', 'mute-everyone', 'security', 'participants-pane',
                 ],
                 disableWelcomePage: true,
                 enableClosePage: false,
@@ -75,7 +81,7 @@ function PsyConsultationRoomContent() {
                 SHOW_JITSI_WATERMARK: false,
                 SHOW_WATERMARK_FOR_GUESTS: false,
                 DEFAULT_BACKGROUND: '#0F172A',
-                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
                 DISPLAY_WELCOME_PAGE_CONTENT: false,
                 GENERATE_ROOMNAMES_ON_WELCOME_PAGE: false,
                 HIDE_DEEP_LINKING_LOGO: true,
@@ -87,6 +93,11 @@ function PsyConsultationRoomContent() {
 
             apiRef.current = jitsiApi;
             setStatus('ready');
+
+            // Automatically enable Lobby (Waiting Room) so participants must be accepted by the psychologist
+            jitsiApi.addEventListener('videoConferenceJoined', () => {
+              jitsiApi.executeCommand('toggleLobby', true);
+            });
 
             jitsiApi.addEventListener('videoConferenceLeft', () => {
               router.push('/dashboard/psychologist');
@@ -102,13 +113,13 @@ function PsyConsultationRoomContent() {
         } else {
           const script = document.createElement('script');
           script.id = scriptId;
-          script.src = `https://${domain}/external_api.js`;
+          script.src = `https://${domain || 'meet.jit.si'}/external_api.js`;
           script.async = true;
           script.onload = initJitsi;
           script.onerror = () => {
             if (!disposed) {
               setError(
-                `Impossible de charger l'API vidéo depuis ${domain}.\n\nOuvrez https://${domain} dans un nouvel onglet, acceptez le certificat, puis revenez actualiser cette page.`
+                `Impossible de charger le module vidéo depuis ${domain || 'meet.jit.si'}. Vérifiez votre connexion Internet et réessayez.`
               );
             }
           };
@@ -168,10 +179,13 @@ function PsyConsultationRoomContent() {
   return (
     <div className="flex flex-col w-screen h-screen bg-slate-950 font-outfit">
       <header className="h-14 border-b border-slate-900 bg-slate-950 px-6 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-glow shadow-emerald-500/50" />
-          <span className="text-xs text-slate-400 font-semibold tracking-wider uppercase">
+          <span className="text-xs text-slate-300 font-semibold tracking-wider uppercase">
             Consultation sécurisée — Espace Psychologue
+          </span>
+          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-purple-950/60 border border-purple-800/50 text-[10px] font-bold text-purple-300 uppercase tracking-wider">
+            Salle d'attente active
           </span>
         </div>
         <button

@@ -10,9 +10,18 @@ let socket: Socket | null = null;
 export function getSocket(userId: string): Socket {
   if (socket && socket.connected) return socket;
 
-  const apiBase =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-  const host = apiBase.replace(/\/api\/v1\/?$/, '');
+  let host = 'http://localhost:3001';
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname.includes('educanet.pro')) {
+      host = 'https://be-psy.educanet.pro';
+    } else {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+      host = apiBase.replace(/\/api\/v1\/?$/, '');
+    }
+  } else {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+    host = apiBase.replace(/\/api\/v1\/?$/, '');
+  }
 
   socket = io(`${host}/chat`, {
     query: { userId },
