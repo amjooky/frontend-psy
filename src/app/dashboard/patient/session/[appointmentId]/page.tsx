@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Loader, AlertCircle, PhoneOff, Video, Clock, ShieldCheck } from 'lucide-react';
 import api from '@/lib/api';
+import { BreathingWidget } from '@/components/session/BreathingWidget';
 
 declare global {
   interface Window {
@@ -172,36 +173,47 @@ function ConsultationRoomContent() {
 
   if (status === 'waiting_for_host') {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center font-outfit text-slate-100 p-6 text-center">
-        {/* Animated glowing radar pulse */}
-        <div className="relative mb-8">
-          <div className="w-24 h-24 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center animate-pulse">
-            <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center">
-              <Video className="w-8 h-8 text-purple-400" />
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center font-outfit text-slate-100 p-4 sm:p-6 text-center py-12">
+        <div className="max-w-md w-full mx-auto space-y-6">
+          {/* Animated glowing radar pulse */}
+          <div className="relative mx-auto w-fit">
+            <div className="w-20 h-20 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center animate-pulse">
+              <div className="w-14 h-14 rounded-full bg-teal-500/20 flex items-center justify-center">
+                <Video className="w-7 h-7 text-teal-400" />
+              </div>
+            </div>
+            <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-500 border-2 border-slate-950 flex items-center justify-center shadow-sm">
+              <Clock className="w-3.5 h-3.5 text-slate-950 font-bold" />
             </div>
           </div>
-          <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-500 border-2 border-slate-950 flex items-center justify-center">
-            <Clock className="w-3.5 h-3.5 text-slate-950" />
+
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">En attente de votre praticien</h3>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm mx-auto">
+              {waitingMessage || "Votre praticien n'a pas encore lancé la consultation. La salle s'ouvrira automatiquement dès son arrivée."}
+            </p>
+          </div>
+
+          {/* Live auto-connection badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-slate-800 text-xs text-teal-300 font-medium shadow-sm">
+            <Loader className="w-3.5 h-3.5 animate-spin text-teal-400" />
+            <span>Détection de connexion automatique active...</span>
+          </div>
+
+          {/* Guided Relaxation & Breathing Sphere */}
+          <div className="pt-2">
+            <BreathingWidget isCompact />
+          </div>
+
+          <div>
+            <button
+              onClick={() => router.push('/dashboard/patient/appointments')}
+              className="px-6 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 text-xs font-semibold transition-all"
+            >
+              Retour à mes rendez-vous
+            </button>
           </div>
         </div>
-
-        <h3 className="text-2xl font-bold text-white mb-2">En attente de votre praticien</h3>
-        <p className="text-slate-400 text-sm max-w-md leading-relaxed mb-6">
-          {waitingMessage || "Votre psychologue n'a pas encore lancé la consultation. Veuillez patienter, la salle s'ouvrira automatiquement dès son arrivée."}
-        </p>
-
-        {/* Live auto-connection badge */}
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 border border-slate-800 text-xs text-purple-300 font-medium mb-8 shadow-sm">
-          <Loader className="w-3.5 h-3.5 animate-spin text-purple-400" />
-          <span>Connexion automatique en attente...</span>
-        </div>
-
-        <button
-          onClick={() => router.push('/dashboard/patient/appointments')}
-          className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-sm font-semibold transition-all"
-        >
-          Retour à mes rendez-vous
-        </button>
       </div>
     );
   }
