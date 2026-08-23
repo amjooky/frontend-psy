@@ -73,13 +73,13 @@ export default function AdminPayments() {
                   </div>
                   <div>
                     <h4 className="font-bold text-[#1B2559] text-base">{inv.invoiceNumber}</h4>
-                    <p className="text-xs text-slate-500 mt-2 font-medium flex items-center gap-3">
-                      <span>Patient: {inv.patient?.isAnonymous ? inv.patient?.anonymousName || 'Anonymous' : `${inv.patient?.firstName || ''} ${inv.patient?.lastName || ''}`}</span>
-                      <span>·</span>
-                      <span>Amount: <span className="font-bold text-slate-800">{safeDecimal(inv.total, '80')} {inv.currency}</span></span>
-                      <span>·</span>
-                      <span>Dr. {inv.appointment?.psychologist?.firstName} {inv.appointment?.psychologist?.lastName}</span>
-                    </p>
+                    <div className="text-xs text-slate-500 mt-2 font-medium flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                      <span>Patient: <strong className="text-slate-700">{inv.patient?.isAnonymous ? inv.patient?.anonymousName || 'Anonymous' : `${inv.patient?.firstName || ''} ${inv.patient?.lastName || ''}`}</strong></span>
+                      <span className="hidden sm:inline text-slate-300">·</span>
+                      <span>Montant: <strong className="text-[#1B2559]">{safeDecimal(inv.total, '80')} {inv.currency}</strong></span>
+                      <span className="hidden sm:inline text-slate-300">·</span>
+                      <span>Praticien: Dr. {inv.appointment?.psychologist?.firstName} {inv.appointment?.psychologist?.lastName}</span>
+                    </div>
                   </div>
                 </div>
 
