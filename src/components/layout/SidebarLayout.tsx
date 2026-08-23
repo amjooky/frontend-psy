@@ -20,6 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNotifications, PATIENT_MODULE_TYPES } from '@/hooks/useNotifications';
 import NotificationBell from '@/components/ui/NotificationBell';
 import { MobilePatientBottomNav } from './MobilePatientBottomNav';
+import { UpcomingSessionBanner } from '@/components/session/UpcomingSessionBanner';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -154,6 +155,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
         {/* Responsive main content with safe padding for mobile bottom bar */}
         <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto custom-scrollbar bg-slate-50/50">
+          <UpcomingSessionBanner />
           {children}
         </main>
       </div>
