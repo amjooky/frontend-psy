@@ -2,18 +2,30 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import PsySidebarLayout from '@/components/layout/PsySidebarLayout';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { MessageSquare, Send, User, MessageCircle, Loader } from 'lucide-react';
+import {
+  MessageSquare,
+  Send,
+  Loader,
+  ArrowLeft,
+  Search,
+  CheckCheck,
+  ShieldCheck,
+  Lock
+} from 'lucide-react';
 import { getSocket } from '@/lib/socket';
 import { useAuth } from '@/hooks/useAuth';
+import { haptic } from '@/lib/haptics';
 
 export default function PsyChat() {
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [socket, setSocket] = useState<any>(null);
   const [typingUser, setTypingUser] = useState<{ userId: string; text?: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,15 +38,12 @@ export default function PsyChat() {
       const payload = res.data?.data || res.data;
       const data = Array.isArray(payload) ? payload : [];
       setConversations(data);
-      if (data.length > 0 && !activeConvId) {
-        setActiveConvId(data[0].id);
-      }
       return data;
     },
   });
 
   // Fetch messages when active conversation changes
-  useQuery({
+  const { isLoading: messagesLoading } = useQuery({
     queryKey: ['psy-messages', activeConvId],
     queryFn: async () => {
       if (!activeConvId) return [];
@@ -47,7 +56,7 @@ export default function PsyChat() {
     enabled: !!activeConvId,
   });
 
-  // Connect Socket (reuse singleton — shared with NotificationSocketBridge)
+  // Connect Socket
   useEffect(() => {
     if (!user?.id) return;
     const socketClient = getSocket(user.id);
@@ -60,6 +69,7 @@ export default function PsyChat() {
 
     const handleNewMessage = (newMsg: any) => {
       if (newMsg.conversationId === activeConvId) {
+        haptic.light();
         setMessages((prev) => {
           if (prev.some((m) => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
@@ -107,8 +117,9 @@ export default function PsyChat() {
   const sendMessage = async () => {
     if (!inputMessage.trim() || !activeConvId) return;
 
-    const content = inputMessage;
+    const content = inputMessage.trim();
     setInputMessage('');
+    haptic.success();
 
     if (socket) {
       socket.emit('typing', {
@@ -137,153 +148,274 @@ export default function PsyChat() {
   const activeConvoObj = conversations.find((c) => c.id === activeConvId);
   const activePatient = activeConvoObj?.patient;
 
+  const filteredConvos = conversations.filter((c) => {
+    const name = `${c.patient?.firstName || ''} ${c.patient?.lastName || ''}`.toLowerCase();
+    return name.includes(searchQuery.toLowerCase());
+  });
+
   return (
     <PsySidebarLayout>
-      <div className="h-[calc(100vh-140px)] flex border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-sm">
+      <div className="h-[calc(100dvh-7.5rem)] md:h-[calc(100vh-130px)] max-w-6xl mx-auto flex rounded-3xl overflow-hidden border border-slate-200/90 bg-white shadow-md font-outfit">
         
-        {/* Conversations Sidebar */}
-        <div className="w-1/3 min-w-[280px] max-w-[360px] border-r border-slate-200/80 bg-slate-50/50 flex flex-col">
-          <div className="p-5 border-b border-slate-200/80 bg-white">
-            <h3 className="font-bold text-[#1B2559] text-base flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-[#7C3AED]" />
-              Messagerie Patient
-            </h3>
-            <p className="text-xs text-slate-400 font-light mt-0.5">Consultations et suivis en direct</p>
+        {/* ═══════════════════════════════════════════════════════════
+            CONVERSATIONS INBOX LIST (LEFT SIDEBAR)
+        ════════════════════════════════════════════════════════════ */}
+        <div className={`w-full md:w-[340px] lg:w-[380px] border-r border-slate-200/80 bg-white flex flex-col shrink-0 ${
+          activeConvId ? 'hidden md:flex' : 'flex'
+        }`}>
+          {/* Inbox Header */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/70">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-extrabold text-[#1B2559] text-lg sm:text-xl tracking-tight flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#7C3AED]" />
+                Messagerie Patient
+              </h3>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-[#7C3AED] border border-purple-100">
+                {conversations.length} patient{conversations.length > 1 ? 's' : ''}
+              </span>
+            </div>
+
+            {/* Messenger Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Rechercher un patient..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9.5 pr-4 py-2 rounded-2xl bg-white border border-slate-200/80 text-xs text-slate-700 placeholder:text-slate-400 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none transition-all"
+              />
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          {/* Conversation List Items */}
+          <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-1 custom-scrollbar">
             {convsLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader className="w-5 h-5 animate-spin text-[#7C3AED]" />
+              <div className="flex flex-col items-center justify-center py-16 gap-2 text-xs text-slate-400">
+                <Loader className="w-6 h-6 animate-spin text-[#7C3AED]" />
+                <span>Chargement des conversations...</span>
               </div>
-            ) : conversations.length > 0 ? (
-              conversations.map((conv) => {
+            ) : filteredConvos.length > 0 ? (
+              filteredConvos.map((conv) => {
                 const otherParticipant = conv.patient || {};
                 const isActive = activeConvId === conv.id;
+                const lastMsg = conv.messages?.[0];
+                const displayName = otherParticipant.firstName ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : 'Patient Anonyme';
+
                 return (
                   <button
                     key={conv.id}
-                    onClick={() => setActiveConvId(conv.id)}
-                    className={`w-full p-3.5 rounded-2xl flex items-center gap-3 text-left transition-all ${
+                    onClick={() => {
+                      haptic.light();
+                      setActiveConvId(conv.id);
+                    }}
+                    className={`w-full p-3.5 rounded-2xl flex items-center gap-3.5 text-left transition-all relative ${
                       isActive
-                        ? 'bg-white shadow-md shadow-purple-200/50 border border-purple-200 text-[#1B2559]'
-                        : 'text-slate-600 hover:bg-white/70 border border-transparent'
+                        ? 'bg-gradient-to-r from-purple-50/80 to-indigo-50/40 border border-purple-200 shadow-sm'
+                        : 'hover:bg-slate-50 border border-transparent'
                     }`}
                   >
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 border ${
-                      isActive
-                        ? 'bg-purple-50 text-[#7C3AED] border-purple-200'
-                        : 'bg-slate-100 text-slate-500 border-slate-200'
-                    }`}>
-                      {otherParticipant.firstName?.[0] || 'P'}
+                    {/* Avatar with Online Badge */}
+                    <div className="relative shrink-0">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm border shadow-sm ${
+                        isActive
+                          ? 'bg-[#7C3AED] text-white border-purple-300'
+                          : 'bg-purple-50 text-[#7C3AED] border-purple-100'
+                      }`}>
+                        {otherParticipant.firstName?.[0] || 'P'}
+                      </div>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
                     </div>
-                    <div className="truncate flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-[#1B2559] truncate">
-                        {otherParticipant.firstName ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : 'Patient Anonyme'}
-                      </h4>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5 font-light">
-                        {conv.messages?.[0]?.content || 'Aucun message pour le moment'}
+
+                    {/* Meta */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-xs sm:text-sm text-[#1B2559] truncate">
+                          {displayName}
+                        </h4>
+                        {lastMsg && (
+                          <span className="text-[10px] text-slate-400 font-medium shrink-0 ml-2">
+                            {new Date(lastMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-xs truncate mt-0.5 ${isActive ? 'text-slate-600 font-medium' : 'text-slate-400 font-light'}`}>
+                        {lastMsg?.content || 'Aucun message échangé'}
                       </p>
                     </div>
                   </button>
                 );
               })
             ) : (
-              <div className="text-center py-12 px-4 space-y-2">
-                <MessageSquare className="w-8 h-8 text-slate-300 mx-auto" />
-                <p className="text-xs text-slate-400 font-medium">Aucune conversation patient</p>
+              <div className="text-center py-16 px-4 space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-[#7C3AED] flex items-center justify-center mx-auto border border-purple-100">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <p className="text-xs text-slate-500 font-medium">Aucun patient trouvé</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Message Window */}
-        <div className="flex-1 flex flex-col bg-slate-50/30 justify-between">
-          {activeConvId ? (
+        {/* ═══════════════════════════════════════════════════════════
+            MESSENGER ACTIVE CHAT ROOM (RIGHT / FULL SCREEN ON MOBILE)
+        ════════════════════════════════════════════════════════════ */}
+        <div className={`flex-1 flex flex-col bg-slate-50/50 justify-between ${
+          !activeConvId ? 'hidden md:flex' : 'flex'
+        }`}>
+          {activeConvId && activePatient ? (
             <>
-              {/* HEADER */}
-              <div className="px-6 py-4 border-b border-slate-200/80 bg-white flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200 text-[#7C3AED] font-bold flex items-center justify-center text-sm">
-                  {activePatient?.firstName?.[0] || 'P'}
+              {/* Messenger Header */}
+              <div className="px-4 sm:px-6 py-3.5 border-b border-slate-200/90 bg-white/95 backdrop-blur-md flex items-center justify-between shadow-xs sticky top-0 z-20">
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Back button on mobile */}
+                  <button
+                    onClick={() => {
+                      haptic.light();
+                      setActiveConvId(null);
+                    }}
+                    className="md:hidden p-2 -ml-1 rounded-full text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                      {activePatient?.firstName?.[0] || 'P'}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs" />
+                  </div>
+
+                  {/* Title and Status */}
+                  <div className="min-w-0 truncate">
+                    <h4 className="font-bold text-sm sm:text-base text-[#1B2559] truncate flex items-center gap-1.5">
+                      <span>{activePatient?.firstName ? `${activePatient.firstName} ${activePatient.lastName}` : 'Patient Anonyme'}</span>
+                      <ShieldCheck className="w-4 h-4 text-[#7C3AED] shrink-0" />
+                    </h4>
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      En ligne • Canal médical chiffré
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#1B2559]">
-                    {activePatient?.firstName ? `${activePatient.firstName} ${activePatient.lastName}` : 'Patient Anonyme'}
-                  </h4>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Patient connecté • Canal sécurisé
+
+                <div className="flex items-center gap-1 text-slate-400">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-[#7C3AED] border border-purple-100 hidden sm:inline-block">
+                    Suivi Patient
                   </span>
                 </div>
               </div>
 
-              {/* MESSAGES DISPLAY */}
-              <div className="flex-1 p-6 overflow-y-auto space-y-3.5">
-                {messages.map((msg, idx) => {
-                  const isMe = msg.senderId === activeConvoObj?.psychologistId;
-                  return (
-                    <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+              {/* Messenger Messages Scroll View */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3.5 custom-scrollbar bg-slate-100/40">
+                {/* Security notice chip */}
+                <div className="flex justify-center my-2">
+                  <span className="text-[10px] font-semibold text-slate-500 bg-white/80 border border-slate-200/80 px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+                    <Lock className="w-3 h-3 text-[#7C3AED]" />
+                    Échange confidentiel & secret médical
+                  </span>
+                </div>
+
+                {messagesLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader className="w-6 h-6 animate-spin text-[#7C3AED]" />
+                  </div>
+                ) : messages && messages.length > 0 ? (
+                  messages.map((msg, idx) => {
+                    const isMe = msg.senderId === activeConvoObj?.psychologistId;
+                    const timeStr = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    return (
                       <div
-                        className={`max-w-[70%] p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm ${
-                          isMe
-                            ? 'bg-[#7C3AED] text-white rounded-tr-none'
-                            : 'bg-white text-slate-700 rounded-tl-none border border-slate-200/80'
-                        }`}
+                        key={msg.id || idx}
+                        className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-150`}
                       >
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                        <span className={`text-[9px] block mt-1.5 text-right font-medium ${
-                          isMe ? 'text-white/80' : 'text-slate-400'
-                        }`}>
-                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                        <div
+                          className={`max-w-[82%] sm:max-w-[70%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm relative ${
+                            isMe
+                              ? 'bg-gradient-to-tr from-[#7C3AED] to-[#6D28D9] text-white rounded-tr-xs'
+                              : 'bg-white text-slate-800 border border-slate-200/90 rounded-tl-xs'
+                          }`}
+                        >
+                          <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                          <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] ${
+                            isMe ? 'text-purple-100' : 'text-slate-400'
+                          }`}>
+                            <span>{timeStr}</span>
+                            {isMe && <CheckCheck className="w-3.5 h-3.5 text-white/90" />}
+                          </div>
+                        </div>
                       </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-12 px-4">
+                    <div className="w-12 h-12 rounded-full bg-purple-50 text-[#7C3AED] flex items-center justify-center mx-auto mb-2 border border-purple-100">
+                      <MessageSquare className="w-6 h-6" />
                     </div>
-                  );
-                })}
+                    <p className="text-xs text-slate-500 font-medium">Démarrez la conversation avec votre patient.</p>
+                  </div>
+                )}
+
+                {/* Animated Typing Bubble */}
                 {typingUser && (
                   <div className="flex justify-start">
-                    <div className="max-w-[70%] p-3.5 rounded-2xl text-xs bg-white text-slate-500 rounded-tl-none border border-purple-200 italic flex flex-col gap-1 shadow-sm animate-pulse">
-                      <span className="text-[10px] text-[#7C3AED] font-bold not-italic">
-                        {activePatient?.firstName ? `${activePatient.firstName} ${activePatient.lastName}` : 'Le patient'} est en train d&apos;écrire...
+                    <div className="px-4 py-3 rounded-2xl rounded-tl-xs bg-white text-slate-600 border border-purple-200 shadow-sm flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#7C3AED]">
+                        {activePatient?.firstName || 'Le patient'}
                       </span>
-                      {typingUser.text && <span className="text-slate-600 not-italic font-normal">« {typingUser.text} »</span>}
+                      <div className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
                     </div>
                   </div>
                 )}
+
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Input */}
-              <div className="p-4 border-t border-slate-200/80 bg-white flex gap-3">
-                <input
-                  type="text"
-                  placeholder="Rédigez votre réponse médicale sécurisée..."
-                  value={inputMessage}
-                  onChange={handleInputChange}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                  className="flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-4 py-3 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none placeholder:text-slate-400"
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!inputMessage.trim()}
-                  className="p-3.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white disabled:bg-purple-200 disabled:cursor-not-allowed shadow-md shadow-purple-500/10 transition-all shrink-0"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+              {/* Messenger Bottom Input Bar */}
+              <div className="p-3 sm:p-4 border-t border-slate-200/90 bg-white sticky bottom-0 z-20">
+                <div className="flex items-center gap-2 max-w-4xl mx-auto">
+                  <div className="flex-1 flex items-center bg-slate-100/90 border border-slate-200/80 rounded-full px-4 py-1.5 focus-within:border-[#7C3AED] focus-within:bg-white focus-within:ring-2 focus-within:ring-purple-400/20 transition-all">
+                    <input
+                      type="text"
+                      placeholder="Rédigez votre réponse médicale sécurisée..."
+                      value={inputMessage}
+                      onChange={handleInputChange}
+                      onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                      className="flex-1 bg-transparent py-1.5 outline-none text-xs sm:text-sm text-slate-800 placeholder:text-slate-400"
+                    />
+                  </div>
+
+                  {/* Send Button */}
+                  <button
+                    onClick={sendMessage}
+                    disabled={!inputMessage.trim()}
+                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] disabled:bg-slate-200 disabled:text-slate-400 text-white flex items-center justify-center shadow-md shadow-purple-500/25 transition-all shrink-0 active:scale-95"
+                  >
+                    <Send className="w-4 h-4 ml-0.5" />
+                  </button>
+                </div>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#7C3AED] mb-4">
-                <MessageCircle className="w-7 h-7" />
+            /* Empty state on desktop */
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50/50">
+              <div className="w-16 h-16 rounded-3xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#7C3AED] mb-4 shadow-sm">
+                <MessageSquare className="w-8 h-8" />
               </div>
-              <h4 className="text-[#1B2559] font-bold text-base">Sélectionnez un patient</h4>
-              <p className="text-slate-400 text-xs font-light mt-1 max-w-sm">
-                Choisissez un patient dans la colonne de gauche pour débuter la séance de messagerie sécurisée.
+              <h4 className="font-bold text-[#1B2559] text-lg">Séances de Messagerie Patient</h4>
+              <p className="text-slate-400 text-xs sm:text-sm font-medium mt-1.5 max-w-xs leading-relaxed">
+                Sélectionnez un patient dans la colonne de gauche pour débuter l'échange thérapeutique sécurisé.
               </p>
             </div>
           )}
         </div>
+
       </div>
     </PsySidebarLayout>
   );
