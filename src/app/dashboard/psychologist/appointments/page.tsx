@@ -390,24 +390,43 @@ export default function PsyAppointments() {
                       </div>
                     )}
 
-                    {appt.status === 'CONFIRMED' && (
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/dashboard/psychologist/session/${appt.id}`}
-                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-purple-500/20"
-                        >
-                          <Video className="w-4 h-4" />
-                          Rejoindre la séance
-                        </Link>
-                        <button
-                          onClick={() => setCancelModalAppt(appt)}
-                          className="px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-rose-50 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-medium transition-all"
-                          title="Annuler le rendez-vous"
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    )}
+                    {appt.status === 'CONFIRMED' && (() => {
+                      const isExpired = appt.endAt && (Date.now() > new Date(appt.endAt).getTime() + 6 * 60 * 60 * 1000);
+                      if (isExpired) {
+                        return (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled
+                              aria-disabled="true"
+                              title="Cette séance de consultation a expiré et n'est plus accessible."
+                              className="px-5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 text-xs font-bold flex items-center gap-2 cursor-not-allowed opacity-60 pointer-events-none select-none"
+                            >
+                              <Video className="w-4 h-4 text-slate-300" />
+                              <span>Rejoindre la séance</span>
+                            </button>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/dashboard/psychologist/session/${appt.id}`}
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-purple-500/20"
+                          >
+                            <Video className="w-4 h-4" />
+                            Rejoindre la séance
+                          </Link>
+                          <button
+                            onClick={() => setCancelModalAppt(appt)}
+                            className="px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-rose-50 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-medium transition-all"
+                            title="Annuler le rendez-vous"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      );
+                    })()}
 
                     {appt.status === 'COMPLETED' && (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">

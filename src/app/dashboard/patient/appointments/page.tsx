@@ -163,16 +163,33 @@ export default function AppointmentsPage() {
 
                   {/* Actions */}
                   <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                    {appt.status === 'CONFIRMED' && (
-                      <Link
-                        href={`/dashboard/patient/session/${appt.id}`}
-                        onClick={() => haptic.success()}
-                        className="px-5 py-2.5 rounded-2xl bg-[#2EC4B6] hover:bg-[#25b5a7] text-white text-xs font-bold transition-all shadow-md shadow-teal-500/20 flex items-center gap-2 active:scale-95"
-                      >
-                        <Video className="w-4 h-4" />
-                        Rejoindre la salle
-                      </Link>
-                    )}
+                    {appt.status === 'CONFIRMED' && (() => {
+                      const isExpired = appt.endAt && (Date.now() > new Date(appt.endAt).getTime() + 6 * 60 * 60 * 1000);
+                      if (isExpired) {
+                        return (
+                          <button
+                            type="button"
+                            disabled
+                            aria-disabled="true"
+                            title="Cette séance de consultation a expiré et n'est plus accessible."
+                            className="px-5 py-2.5 rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 cursor-not-allowed opacity-60 pointer-events-none select-none"
+                          >
+                            <Video className="w-4 h-4 text-slate-300" />
+                            <span>Rejoindre la salle</span>
+                          </button>
+                        );
+                      }
+                      return (
+                        <Link
+                          href={`/dashboard/patient/session/${appt.id}`}
+                          onClick={() => haptic.success()}
+                          className="px-5 py-2.5 rounded-2xl bg-[#2EC4B6] hover:bg-[#25b5a7] text-white text-xs font-bold transition-all shadow-md shadow-teal-500/20 flex items-center gap-2 active:scale-95"
+                        >
+                          <Video className="w-4 h-4" />
+                          Rejoindre la salle
+                        </Link>
+                      );
+                    })()}
 
                     {appt.status === 'PENDING' && (
                       <Link

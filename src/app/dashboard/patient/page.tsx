@@ -104,13 +104,32 @@ export default function PatientOverview() {
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href={`/dashboard/patient/session/${upcomingSession.id}`}
-                    onClick={() => haptic.success()}
-                    className="px-5 py-3 rounded-2xl bg-[#1B2559] hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 shrink-0"
-                  >
-                    Rejoindre la salle
-                  </Link>
+                  {(() => {
+                    const isExpired = upcomingSession.endAt && (Date.now() > new Date(upcomingSession.endAt).getTime() + 6 * 60 * 60 * 1000);
+                    if (isExpired) {
+                      return (
+                        <button
+                          type="button"
+                          disabled
+                          aria-disabled="true"
+                          title="Cette séance de consultation a expiré et n'est plus accessible."
+                          className="px-5 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed opacity-60 pointer-events-none select-none shrink-0"
+                        >
+                          <Video className="w-4 h-4 text-slate-300" />
+                          <span>Rejoindre la salle</span>
+                        </button>
+                      );
+                    }
+                    return (
+                      <Link
+                        href={`/dashboard/patient/session/${upcomingSession.id}`}
+                        onClick={() => haptic.success()}
+                        className="px-5 py-3 rounded-2xl bg-[#1B2559] hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 shrink-0"
+                      >
+                        Rejoindre la salle
+                      </Link>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="text-center py-8 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl">

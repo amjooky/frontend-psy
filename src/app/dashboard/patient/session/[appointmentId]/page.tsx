@@ -219,27 +219,55 @@ function ConsultationRoomContent() {
   }
 
   if (status === 'error' || error) {
+    const isExpired = error?.toLowerCase().includes('expiré') || error?.toLowerCase().includes('expirée');
+
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center font-outfit text-slate-100 p-6 text-center">
         <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-5">
           <AlertCircle className="w-8 h-8 text-red-400" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">Connexion impossible</h3>
-        <p className="text-slate-400 text-sm max-w-md leading-relaxed whitespace-pre-line mb-6">{error}</p>
-        <div className="flex gap-3">
-          <button
-            onClick={() => { setError(null); setStatus('loading'); setRetryKey((k) => k + 1); }}
-            className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all"
-          >
-            Réessayer
-          </button>
-          <button
-            onClick={() => router.push('/dashboard/patient')}
-            className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-sm font-semibold transition-all"
-          >
-            Retour au tableau de bord
-          </button>
-        </div>
+        <h3 className="text-xl font-bold text-white mb-2">
+          {isExpired ? 'Séance expirée' : 'Connexion impossible'}
+        </h3>
+        <p className="text-slate-400 text-sm max-w-md leading-relaxed whitespace-pre-line mb-6">
+          {error}
+        </p>
+
+        {isExpired ? (
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Cette séance de consultation a expiré et n'est plus accessible."
+              className="px-6 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-500 text-sm font-semibold cursor-not-allowed opacity-50 pointer-events-none select-none flex items-center gap-2"
+            >
+              <Video className="w-4 h-4 text-slate-600" />
+              <span>Rejoindre la salle</span>
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/patient/appointments')}
+              className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-sm font-semibold transition-all"
+            >
+              Retour à mes rendez-vous
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setError(null); setStatus('loading'); setRetryKey((k) => k + 1); }}
+              className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-all"
+            >
+              Réessayer
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/patient')}
+              className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-sm font-semibold transition-all"
+            >
+              Retour au tableau de bord
+            </button>
+          </div>
+        )}
       </div>
     );
   }
