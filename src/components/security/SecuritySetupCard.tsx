@@ -321,6 +321,7 @@ export default function SecuritySetupCard({ userEmail }: SecuritySetupCardProps)
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               {qrCodeUrl ? (
                 <div className="flex flex-col items-center p-4 bg-white border border-slate-200 rounded-2xl w-fit mx-auto md:mx-0 shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrCodeUrl} alt="2FA QR Code" className="w-40 h-40 object-contain" />
                 </div>
               ) : (

@@ -449,7 +449,9 @@ export function PsychologistKycStepper({ initialProfile, onSuccess, onClose }: K
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center justify-between">
                   <span>Numéro d'Agrément CNOM / Arrêté *</span>
-                  <HelpCircle className="w-3.5 h-3.5 text-slate-400" title="Numéro d'inscription à l'Ordre ou arrêté du Ministère de la Santé" />
+                  <span title="Numéro d'inscription à l'Ordre ou arrêté du Ministère de la Santé">
+                    <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                  </span>
                 </label>
                 <input
                   type="text"
