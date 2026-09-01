@@ -201,7 +201,10 @@ export default function PsyProfileSettings() {
             </div>
           </div>
         ) : (
-          <SecuritySetupCard userEmail={profile?.user?.email} />
+          <SecuritySetupCard 
+            userEmail={profile?.user?.email} 
+            initial2FaEnabled={profile?.user?.isTwoFactorEnabled} 
+          />
         )}
       </div>
     </PsySidebarLayout>

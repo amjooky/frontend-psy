@@ -25,7 +25,10 @@ export default function PatientSecurityPage() {
           </p>
         </div>
 
-        <SecuritySetupCard userEmail={patient?.user?.email} />
+        <SecuritySetupCard 
+          userEmail={patient?.user?.email} 
+          initial2FaEnabled={patient?.user?.isTwoFactorEnabled} 
+        />
       </div>
     </SidebarLayout>
   );

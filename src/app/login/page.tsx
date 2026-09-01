@@ -43,15 +43,24 @@ function LoginForm() {
       setSubmitting(true);
       haptic.medium();
 
-      const response = await api.post('/auth/login', values);
+      const payload: Record<string, any> = {
+        email: values.email,
+        password: values.password,
+      };
+      if (values.twoFactorCode && values.twoFactorCode.trim()) {
+        payload.twoFactorCode = values.twoFactorCode.trim();
+      }
 
-      if (response.data?.data?.requireTwoFactor) {
+      const response = await api.post('/auth/login', payload);
+      const resData = response.data?.data || response.data;
+
+      if (resData?.requiresTwoFactor || resData?.requireTwoFactor) {
         setRequire2FA(true);
         setSubmitting(false);
         return;
       }
 
-      const { accessToken, refreshToken, user } = response.data?.data || response.data;
+      const { accessToken, refreshToken, user } = resData || {};
       
       localStorage.setItem('token', accessToken);
       localStorage.setItem('refreshToken', refreshToken);

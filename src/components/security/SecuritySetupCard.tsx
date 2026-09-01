@@ -20,9 +20,10 @@ import {
 
 interface SecuritySetupCardProps {
   userEmail?: string;
+  initial2FaEnabled?: boolean;
 }
 
-export default function SecuritySetupCard({ userEmail }: SecuritySetupCardProps) {
+export default function SecuritySetupCard({ userEmail, initial2FaEnabled }: SecuritySetupCardProps) {
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -33,7 +34,7 @@ export default function SecuritySetupCard({ userEmail }: SecuritySetupCardProps)
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // 2FA state
-  const [is2FaEnabled, setIs2FaEnabled] = useState(false);
+  const [is2FaEnabled, setIs2FaEnabled] = useState(initial2FaEnabled ?? false);
   const [totpSecret, setTotpSecret] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState('');
@@ -42,6 +43,19 @@ export default function SecuritySetupCard({ userEmail }: SecuritySetupCardProps)
   const [tfaSuccess, setTfaSuccess] = useState<string | null>(null);
   const [tfaError, setTfaError] = useState<string | null>(null);
   const [showDisableModal, setShowDisableModal] = useState(false);
+
+  React.useEffect(() => {
+    if (initial2FaEnabled !== undefined) {
+      setIs2FaEnabled(initial2FaEnabled);
+    } else if (typeof window !== 'undefined') {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (storedUser.isTwoFactorEnabled !== undefined) {
+          setIs2FaEnabled(!!storedUser.isTwoFactorEnabled);
+        }
+      } catch {}
+    }
+  }, [initial2FaEnabled]);
 
   // Logout All state
   const [logoutSuccess, setLogoutSuccess] = useState<string | null>(null);
@@ -112,6 +126,13 @@ export default function SecuritySetupCard({ userEmail }: SecuritySetupCardProps)
       setTotpCode('');
       setTfaSuccess('L\'authentification à deux facteurs est maintenant activée !');
       setTfaError(null);
+      if (typeof window !== 'undefined') {
+        try {
+          const u = JSON.parse(localStorage.getItem('user') || '{}');
+          u.isTwoFactorEnabled = true;
+          localStorage.setItem('user', JSON.stringify(u));
+        } catch {}
+      }
       setTimeout(() => setTfaSuccess(null), 4000);
     },
     onError: (err: any) => {
@@ -132,6 +153,13 @@ export default function SecuritySetupCard({ userEmail }: SecuritySetupCardProps)
       setDisableTotpCode('');
       setTfaSuccess('Authentification à deux facteurs désactivée.');
       setTfaError(null);
+      if (typeof window !== 'undefined') {
+        try {
+          const u = JSON.parse(localStorage.getItem('user') || '{}');
+          u.isTwoFactorEnabled = false;
+          localStorage.setItem('user', JSON.stringify(u));
+        } catch {}
+      }
       setTimeout(() => setTfaSuccess(null), 4000);
     },
     onError: (err: any) => {
