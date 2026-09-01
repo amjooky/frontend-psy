@@ -1,19 +1,22 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation, Language } from '@/components/providers/LanguageProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { 
-  ArrowRight, 
-  Shield, 
-  Calendar, 
-  MessageSquare, 
-  Video, 
-  Users, 
+import {
+  Menu,
+  X,
+  ArrowRight,
+  Shield,
+  Calendar,
+  MessageSquare,
+  Video,
+  Users,
   Award,
   CheckCircle2,
   Lock,
@@ -25,858 +28,844 @@ import {
   ChevronDown,
   Info,
   Globe,
-  Check,
-  Star,
-  Clock,
-  Heart,
-  HelpCircle,
-  PhoneCall,
-  ShieldCheck,
-  EyeOff,
-  CreditCard,
-  Zap,
-  Activity,
-  ArrowUpRight,
-  SmilePlus,
-  Play
+  Check
 } from 'lucide-react';
 
 /* ─── Animation variants ─── */
-const fadeInUp: Variants = {
+const fadeInUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, delay: i * 0.08, ease: "easeOut" }
+    transition: { duration: 0.5, delay: i * 0.1 }
   })
 };
 
-const staggerContainer: Variants = {
+const staggerContainer = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } }
+  visible: { transition: { staggerChildren: 0.12 } }
 };
 
-// Verified mock psychologists for showcase
-const FEATURED_PSYCHOLOGISTS = [
-  {
-    id: "1",
-    name: "Dr. Cyrine Ben Salem",
-    title: "Psychologue Clinicienne & Psychothérapeute TCC",
-    specialties: ["Anxiété & Dépression", "Gestion du Stress", "Thérapie TCC"],
-    rating: 4.95,
-    reviewsCount: 128,
-    experience: "9 ans d'expérience",
-    priceTND: "70 TND",
-    priceEUR: "35 €",
-    languages: ["Arabe", "Français", "Anglais"],
-    avatar: "https://images.unsplash.com/photo-1594824813581-229d4791a823?auto=format&fit=crop&q=80&w=400",
-    nextSlot: "Aujourd'hui à 16:30",
-    verified: true,
-  },
-  {
-    id: "2",
-    name: "Dr. Mehdi Trabelsi",
-    title: "Psychologue du Travail & Thérapeute Familial",
-    specialties: ["Burn-out & Travail", "Thérapie de Couple", "Addictions"],
-    rating: 4.92,
-    reviewsCount: 94,
-    experience: "12 ans d'expérience",
-    priceTND: "80 TND",
-    priceEUR: "40 €",
-    languages: ["Arabe", "Français"],
-    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400",
-    nextSlot: "Demain à 10:00",
-    verified: true,
-  },
-  {
-    id: "3",
-    name: "Dr. Nourhene Karray",
-    title: "Spécialiste Enfants, Adolescents & Parentalité",
-    specialties: ["Adolescence", "Estime de soi", "Difficultés scolaires"],
-    rating: 4.98,
-    reviewsCount: 160,
-    experience: "7 ans d'expérience",
-    priceTND: "65 TND",
-    priceEUR: "30 €",
-    languages: ["Arabe", "Français", "Anglais"],
-    avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400",
-    nextSlot: "Demain à 14:00",
-    verified: true,
-  }
-];
-
-const FAQS = [
-  {
-    q: "Comment se déroule une première consultation sur Monpsy ?",
-    a: "Vous choisissez votre psychologue selon sa spécialité et vos préférences, puis vous réservez un créneau en quelques clics. Le jour du rendez-vous, vous accédez à votre espace sécurisé sans rien installer : la visioconférence démarre directement dans votre navigateur web, protégée et confidentielle."
-  },
-  {
-    q: "Puis-je consulter en restant totalement anonyme ?",
-    a: "Oui, absolument. Nous comprenons l'importance de la discrétion. Vous pouvez utiliser un pseudonyme lors de votre inscription. Votre identité réelle n'est jamais divulguée publiquement et la séance se déroule en toute confidentialité."
-  },
-  {
-    q: "Quels sont les moyens de paiement acceptés ?",
-    a: "En Tunisie, vous pouvez payer directement en Dinars Tunisiens (TND) via les passerelles sécurisées Konnect, Flouci, Paymee et cartes bancaires locales. Depuis l'étranger (diaspora et international), les paiements par carte bancaire internationale (Visa, Mastercard) sont traités en toute sécurité via Stripe."
-  },
-  {
-    q: "La téléconsultation est-elle aussi efficace qu'en cabinet présentiel ?",
-    a: "Oui, de nombreuses études cliniques internationales démontrent que la psychothérapie en ligne (TCC, écoute analytique, soutien) offre une efficacité strictement équivalente au présentiel, avec l'avantage majeur d'éliminer le stress du transport, de la salle d'attente et des contraintes horaires."
-  },
-  {
-    q: "Comment sont vérifiés les diplômes des psychologues ?",
-    a: "Chaque professionnel inscrit sur Monpsy passe par un processus de vérification rigoureux (KYC médical) : contrôle des diplômes d'État (Master / Doctorat en Psychologie Clinique), numéro d'autorisation d'exercice et entretien de conformité déontologique par notre équipe médicale."
-  }
-];
-
 export default function LandingPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/login');
+  }, [router]);
+
   const { language, setLanguage, t, dir } = useTranslation();
-  
-  // Interactive diagnostic matching selector state
-  const [selectedTopic, setSelectedTopic] = useState<string>("stress");
-  const [activeFaq, setActiveFaq] = useState<number | null>(0);
-  
-  // Orientation Quiz states
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+  // Quiz states
   const [activeQuiz, setActiveQuiz] = useState<any | null>(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
   const [showTeaser, setShowTeaser] = useState(false);
   const [currentTeaserText, setCurrentTeaserText] = useState("");
 
-  const topicsList = [
-    { id: "stress", label: "Stress & Anxiété", icon: Activity, count: "18 praticiens" },
-    { id: "depression", label: "Baisse de moral & Dépression", icon: Heart, count: "14 praticiens" },
-    { id: "couple", label: "Couple & Relations", icon: Users, count: "11 praticiens" },
-    { id: "burnout", label: "Burn-out & Travail", icon: Zap, count: "9 praticiens" },
-    { id: "adolescents", label: "Adolescents & Études", icon: SmilePlus, count: "8 praticiens" },
-    { id: "deuil", label: "Deuil & Séparation", icon: ShieldCheck, count: "10 praticiens" },
-  ];
+  // States to toggle expanded therapy points list
+  const [expandedSection, setExpandedSection] = useState<Record<string, boolean>>({
+    individuelle: false,
+    couple: false,
+    adolescents: false
+  });
 
-  const startQuiz = (therapyKey: string) => {
+  const toggleSection = (id: string) => {
+    setExpandedSection(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const startQuiz = (therapyKey: string, therapyData: any) => {
     const questions = {
       individuelle: [
         {
           question: language === 'ar' ? "ما هو السبب الرئيسي لزيارتك؟" : language === 'en' ? "What is the main reason for your visit?" : "Quel est le principal motif de votre démarche ?",
-          options: language === 'ar' 
+          options: language === 'ar'
             ? ["التعامل مع الضغوط أو القلق اليومي", "التغلب على فترة اكتئاب أو احتراق نفسي", "العمل على تقدير الذات", "تجاوز حالة حداد أو انفصال"]
             : language === 'en'
-            ? ["Managing daily stress or anxiety", "Overcoming a period of depression or burnout", "Working on self-esteem", "Navigating grief or separation"]
-            : ["Gérer le stress ou l'anxiété au quotidien", "Surmonter une période de dépression ou burn-out", "Travailler sur l'estime de soi", "Traverser un deuil ou une séparation"],
+              ? ["Managing daily stress or anxiety", "Overcoming a period of depression or burnout", "Working on self-esteem", "Navigating grief or separation"]
+              : ["Gérer le stress ou l'anxiété au quotidien", "Surmonter une période de dépression ou burn-out", "Travailler sur l'estime de soi", "Traverser un deuil ou une séparation"],
           teaser: language === 'ar' ? "تحديد الاحتياجات هو الخطوة الأولى والأهم في رحلة التعافي." : language === 'en' ? "Identifying your needs is the most important first step." : "Identifier vos besoins est la première étape essentielle."
         },
         {
           question: language === 'ar' ? "منذ متى تشعر بهذه الأعراض؟" : language === 'en' ? "How long have you been feeling this way?" : "Depuis combien de temps ressentez-vous cela ?",
           options: language === 'ar'
-            ? ["بضعة أيام أو أسابيع", "عدة أشهر", "أكثر من سنة", "تتكرر بشكل متقطع depuis longtemps"]
+            ? ["بضعة أيام أو أسابيع", "عدة أشهر", "أكثر من سنة", "تتكرر بشكل متقطع منذ فترة طويلة"]
             : language === 'en'
-            ? ["A few days or weeks", "Several months", "Over a year", "On and off for a long time"]
-            : ["Quelques jours ou semaines", "Plusieurs mois", "Plus d'un an", "De façon intermittente depuis longtemps"],
+              ? ["A few days or weeks", "Several months", "Over a year", "On and off for a long time"]
+              : ["Quelques jours ou semaines", "Plusieurs mois", "Plus d'un an", "De façon intermittente depuis longtemps"],
           teaser: language === 'ar' ? "الاعتراف بالصعوبات هو نصف الطريق نحو الحل." : language === 'en' ? "Acknowledging struggles is halfway to finding a solution." : "Reconnaître ses difficultés est à mi-chemin de la solution."
         },
         {
-          question: language === 'ar' ? "ما هو الشكل المفضل لديك للاستشارة؟" : language === 'en' ? "What is your preferred session format?" : "Quel format d'échange vous met le plus à l'aise ?",
+          question: language === 'ar' ? "هل تؤثر هذه الصعوبات على حياتك اليومية؟" : language === 'en' ? "Do these difficulties affect your daily life?" : "Ces difficultés affectent-elles votre quotidien ?",
           options: language === 'ar'
-            ? ["مكالمة فيديو مباشرة", "مكالمة صوتية بدون كاميرا", "محادثة كتابية فورية", "لا يهم، الأهم هو كفاءة الأخصائي"]
+            ? ["نعم، بشكل كبير جداً", "نعم، بشكل متوسط", "قليلاً فقط", "لا تؤثر تقريباً"]
             : language === 'en'
-            ? ["Direct video call", "Audio-only session (no camera)", "Live written chat", "No preference, expertise matters most"]
-            : ["Visioconférence HD directe", "Consultation audio (sans caméra)", "Messagerie écrite interactive", "Indifférent, la qualification prime"],
-          teaser: language === 'ar' ? "راحتك النفسية هي أولويتنا المطلقة." : language === 'en' ? "Your emotional comfort is our top priority." : "Votre confort émotionnel est notre priorité absolue."
+              ? ["Yes, significantly", "Yes, moderately", "Only slightly", "Hardly at all"]
+              : ["Oui, de manière significative", "Oui, modérément", "Seulement un peu", "Presque pas du tout"],
+          teaser: language === 'ar' ? "نحن هنا لمساعدتك على استعادة توازن حياتك اليومية." : language === 'en' ? "We are here to help you restore balance in your daily life." : "Nous sommes là pour vous aider à retrouver l'équilibre au quotidien."
+        },
+        {
+          question: language === 'ar' ? "هل سبق لك استشارة طبيب نفسي؟" : language === 'en' ? "Have you ever consulted a psychologist?" : "Avez-vous déjà consulté un psychologue ?",
+          options: language === 'ar'
+            ? ["نعم، بانتظام", "نعم، ولكن بشكل متقطع", "لا، هذه المرة الأولى"]
+            : language === 'en'
+              ? ["Yes, regularly", "Yes, occasionally", "No, this is my first time"]
+              : ["Oui, régulièrement", "Oui, mais de façon occasionnelle", "Non, c'est ma première fois"],
+          teaser: language === 'ar' ? "سواء كانت تجربتك الأولى أو لا، نحن نضمن لك رعاية مخصصة." : language === 'en' ? "Whether it's your first time or not, we guarantee personalized care." : "Que ce soit votre première fois ou non, nous garantissons des soins personnalisés."
+        },
+        {
+          question: language === 'ar' ? "ما هو التغيير الرئيسي الذي تطمح إليه؟" : language === 'en' ? "What main change are you hoping for?" : "Quel changement principal espérez-vous ?",
+          options: language === 'ar'
+            ? ["الشعور براحة أكبر وتخفيف التوتر", "فهم أفضل لمشاعري وسلوكي", "تحسين علاقاتي مع الآخرين", "الحصول على دعم في قرار مهم"]
+            : language === 'en'
+              ? ["Feeling more relaxed and relieved of stress", "Better understanding of my emotions", "Improving relationships with others", "Getting support for an important decision"]
+              : ["Me sentir plus apaisé et libéré du stress", "Mieux comprendre mes émotions", "Améliorer mes relations avec les autres", "Obtenir du soutien pour une décision importante"],
+          teaser: language === 'ar' ? "وضع أهداف واضحة يسرع من تحقيق النتائج الإيجابية." : language === 'en' ? "Setting clear goals accelerates positive results." : "Définir des objectifs clairs accélère les résultats positifs."
+        },
+        {
+          question: language === 'ar' ? "ما هو شكل الجلسات المفضل لديك؟" : language === 'en' ? "What is your preferred session format?" : "Quel est le format de session que vous préférez ?",
+          options: language === 'ar'
+            ? ["جلسة فيديو عن بعد (موصى بها)", "مكالمة صوتية فقط", "محادثة كتابية مشفرة"]
+            : language === 'en'
+              ? ["Online video session (Recommended)", "Audio call only", "Encrypted text chat"]
+              : ["Consultation Vidéo (Recommandé)", "Appel audio uniquement", "Chat écrit sécurisé"],
+          teaser: language === 'ar' ? "المرونة والراحة هما سر نجاح استشاراتنا." : language === 'en' ? "Flexibility and convenience are the keys to successful consultations." : "La flexibilité et le confort sont les clés d'une consultation réussie."
+        }
+      ],
+      couple: [
+        {
+          question: language === 'ar' ? "منذ متى تعاني من هذه الصعوبات؟" : language === 'en' ? "How long have you been experiencing these difficulties?" : "Depuis combien de temps observez-vous ces difficultés ?",
+          options: language === 'ar'
+            ? ["أقل من 6 أشهر", "بين 6 أشهر وسنتين", "عدة سنوات", "نتيجة حدث طارئ مؤخراً"]
+            : language === 'en'
+              ? ["Less than 6 months", "Between 6 months and 2 years", "Several years", "Triggered by a recent event"]
+              : ["Moins de 6 mois", "Entre 6 mois et 2 ans", "Plusieurs années", "Suite à un événement déclencheur récent"],
+          teaser: language === 'ar' ? "جميع العلاقات تمر بفترات حرجة، والبحث عن حل هو علامة قوة." : language === 'en' ? "All relationships face challenges; seeking support is a sign of strength." : "Toutes les relations traversent des crises ; chercher de l'aide est un signe de force."
+        },
+        {
+          question: language === 'ar' ? "هل ما زال هناك حوار هادئ بينكما؟" : language === 'en' ? "Is there still calm dialogue between you?" : "Y a-t-il encore un dialogue calme entre vous ?",
+          options: language === 'ar'
+            ? ["نعم، غالباً", "أحياناً، ولكن سرعان ما يتحول لنقاش حاد", "لا، الحوار مقطوع تماماً", "نتجنب الحديث تماماً لتفادي الخلافات"]
+            : language === 'en'
+              ? ["Yes, mostly", "Sometimes, but it quickly turns into an argument", "No, dialogue is completely cut off", "We avoid talking to prevent conflicts"]
+              : ["Oui, la plupart du temps", "Parfois, mais cela tourne vite à la dispute", "Non, le dialogue est complètement rompu", "Nous évitons de parler pour éviter les conflits"],
+          teaser: language === 'ar' ? "إعادة بناء قنوات التواصل هي الركيزة الأولى للعلاج الزوجي." : language === 'en' ? "Rebuilding communication channels is the first pillar of couples therapy." : "Reconstruire les canaux de communication est le premier pilier de la thérapie."
+        },
+        {
+          question: language === 'ar' ? "هل شريكك موافق على فكرة حضور الجلسات؟" : language === 'en' ? "Is your partner willing to attend sessions?" : "Votre partenaire est-il d'accord pour suivre les sessions ?",
+          options: language === 'ar'
+            ? ["نعم، متفقان تماماً", "شريكي متردد ولكن موافق على التجربة", "لا، يرفض الفكرة حالياً", "لم نتحدث في هذا الموضوع بعد"]
+            : language === 'en'
+              ? ["Yes, fully agreed", "My partner is hesitant but willing to try", "No, refuses the idea for now", "We haven't discussed this yet"]
+              : ["Oui, tout à fait d'accord", "Mon partenaire hésite mais accepte d'essayer", "Non, il/elle refuse pour l'instant", "Nous n'en avons pas encore parlé"],
+          teaser: language === 'ar' ? "يمكن بدء الجلسات بشكل فردي لمساعدتك على التعامل مع الوضع." : language === 'en' ? "Sessions can start individually to help you navigate the situation." : "Les séances peuvent commencer individuellement pour vous aider à gérer la situation."
+        },
+        {
+          question: language === 'ar' ? "ما هو الهدف الأساسي من هذه الاستشارة؟" : language === 'en' ? "What is the primary goal of this consultation?" : "Quel est le but principal de cette consultation ?",
+          options: language === 'ar'
+            ? ["إيجاد حلول للخلافات المتكررة", "استعادة الثقة والحب المفقود", "تسهيل قرار الانفصال بشكل ودي", "تحسين التربية المشتركة للأطفال"]
+            : language === 'en'
+              ? ["Resolving frequent arguments", "Restoring trust and reconnection", "Facilitating an amicable separation", "Improving co-parenting"]
+              : ["Résoudre les disputes fréquentes", "Restaurer la confiance et renouer le lien", "Faciliter une séparation à l'amiable", "Améliorer la coparentalité"],
+          teaser: language === 'ar' ? "تحديد هدف مشترك يساعد بشكل كبير في نجاح العملية العلاجية." : language === 'en' ? "Identifying a shared goal greatly supports the therapy process." : "Définir un objectif commun soutient grandement le processus."
+        },
+        {
+          question: language === 'ar' ? "هل تؤثر المشاكل على الجانب الحميمي؟" : language === 'en' ? "Do these problems affect your physical intimacy?" : "Ces problèmes affectent-ils votre intimité physique ?",
+          options: language === 'ar'
+            ? ["نعم، بشكل كبير", "قليلاً", "لا، هذا الجانب مستقر", "لا نرغب في الإجابة"]
+            : language === 'en'
+              ? ["Yes, significantly", "Slightly", "No, this area is stable", "Prefer not to answer"]
+              : ["Oui, de manière significative", "Légèrement", "Non, cet aspect est préservé", "Ne souhaite pas répondre"],
+          teaser: language === 'ar' ? "الحميمية العاطفية والجسدية مرتبطان بشكل وثيق بنجاح العلاقة." : language === 'en' ? "Emotional and physical intimacy are closely linked in a relationship." : "L'intimité émotionnelle et physique sont étroitement liées."
+        },
+        {
+          question: language === 'ar' ? "هل هناك ضغوط خارجية تؤثر على علاقتكما؟" : language === 'en' ? "Are external stressors impacting your relationship?" : "Des facteurs de stress externes impactent-ils votre relation ?",
+          options: language === 'ar'
+            ? ["نعم، العمل أو المال", "نعم، العائلة أو الأقارب", "نعم، تربية الأطفال", "لا، المشاكل داخلية فقط"]
+            : language === 'en'
+              ? ["Yes, work or finances", "Yes, family or in-laws", "Yes, raising children", "No, stressors are only internal"]
+              : ["Oui, le travail ou l'argent", "Oui, la famille ou l'entourage", "Oui, l'éducation des enfants", "Non, les tensions sont purement internes"],
+          teaser: language === 'ar' ? "فهم الضغوط الخارجية يساعد على تخفيف اللوم المتبادل بين الشريكين." : language === 'en' ? "Understanding external stressors helps reduce mutual blame between partners." : "Comprendre les stress externes aide à réduire les reproches mutuels."
+        }
+      ],
+      adolescents: [
+        {
+          question: language === 'ar' ? "ما هو عمر المراهق المعني بالاستشارة؟" : language === 'en' ? "How old is the teenager concerned?" : "Quel âge a l'adolescent concerné ?",
+          options: language === 'ar'
+            ? ["11 إلى 13 سنة", "14 إلى 16 سنة", "17 إلى 19 سنة"]
+            : language === 'en'
+              ? ["11 to 13 years old", "14 to 16 years old", "17 to 19 years old"]
+              : ["11 à 13 ans", "14 à 16 ans", "17 à 19 ans"],
+          teaser: language === 'ar' ? "تختلف التحديات النفسية والاحتياجات بحسب الفئة العمرية للمراهق." : language === 'en' ? "Psychological challenges and needs vary by the teenager's age." : "Les défis psychologiques et les besoins varient selon l'âge."
+        },
+        {
+          question: language === 'ar' ? "ما هو التغيير السلوكي الأكثر وضوحاً حالياً؟" : language === 'en' ? "What is the most noticeable behavior change?" : "Quel est le changement de comportement le plus marquant ?",
+          options: language === 'ar'
+            ? ["العزلة والانطواء المفرط", "العدوانية أو العصبية السريعة", "تراجع كبير في التحصيل الدراسي", "تغيرات في النوم أو الشهية"]
+            : language === 'en'
+              ? ["Extreme isolation and withdrawal", "Aggressiveness or quick temper", "Drop in academic performance", "Changes in sleep or appetite"]
+              : ["Isolement et repli sur soi", "Agressivité ou irritabilité rapide", "Baisse des résultats scolaires", "Changements de sommeil/d'appétit"],
+          teaser: language === 'ar' ? "التغيرات المفاجئة في السلوك هي بمثابة نداء استغاثة غير مباشر." : language === 'en' ? "Sudden changes in behavior are often an indirect call for help." : "Les changements de comportement sont souvent un appel à l'aide."
+        },
+        {
+          question: language === 'ar' ? "كيف تصف التواصل الأسري معه؟" : language === 'en' ? "How would you describe family communication with them?" : "Comment décririez-vous la communication familiale ?",
+          options: language === 'ar'
+            ? ["صعب جداً ومليء بالتوتر", "سطحي ونتجنب المواضيع الحساسة", "جيد في بعض الأحيان ومستحيل في أحيان أخرى", "شبه منعدم"]
+            : language === 'en'
+              ? ["Very difficult and tense", "Superficial, avoiding sensitive topics", "Good at times, impossible at others", "Almost non-existent"]
+              : ["Très difficile et tendu", "Superficiel, on évite les sujets sensibles", "Bon par moments, impossible à d'autres", "Quasi inexistant"],
+          teaser: language === 'ar' ? "العلاج يساعد في إيجاد حوار آمن وبناء بين الآباء والأبناء." : language === 'en' ? "Therapy helps rebuild safe and constructive dialogue within the family." : "La thérapie aide à retrouver un dialogue sécurisant et constructif."
+        },
+        {
+          question: language === 'ar' ? "هل يواجه مشاكل خارج نطاق العائلة؟" : language === 'en' ? "Do they face challenges outside the family?" : "Rencontre-t-il des difficultés hors du cadre familial ?",
+          options: language === 'ar'
+            ? ["نعم، تنمر أو مشاكل مع الأصدقاء", "نعم، ضغط دراسي وخوف من الفشل", "نعم، صعوبة في التأقلم أو تكوين صداقات", "لا توجد مشاكل ظاهرة خارج المنزل"]
+            : language === 'en'
+              ? ["Yes, bullying or friend issues", "Yes, academic stress and fear of failure", "Yes, trouble fitting in or making friends", "No obvious issues outside the home"]
+              : ["Oui, harcèlement ou soucis d'amis", "Oui, stress scolaire et peur de l'échec", "Oui, mal à s'adapter ou se faire des amis", "Pas de soucis apparents"],
+          teaser: language === 'ar' ? "حماية المراهق ودعمه في بيئته الاجتماعية هي أولويتنا." : language === 'en' ? "Protecting and supporting teens in their social environment is our priority." : "Soutenir l'adolescent dans son environnement social est primordial."
+        },
+        {
+          question: language === 'ar' ? "هل يوافق المراهق على فكرة الحديث مع أخصائي؟" : language === 'en' ? "Is the teen willing to talk to a professional?" : "L'adolescent accepte-t-il de parler à un professionnel ?",
+          options: language === 'ar'
+            ? ["نعم، بطلب منه شخصياً", "موافق على التجربة بشرط الخصوصية", "متردد أو يرفض الفكرة", "لم نطرح عليه الفكرة بعد"]
+            : language === 'en'
+              ? ["Yes, requested it themselves", "Agrees if privacy is guaranteed", "Hesitant or refuses the idea", "We haven't proposed it yet"]
+              : ["Oui, à sa propre demande", "D'accord si la confidentialité est garantie", "Hésitant ou refuse l'idée", "Nous ne lui avons pas proposé"],
+          teaser: language === 'ar' ? "سرية الجلسات تمنح المراهق الأمان الكامل للتعبير عن نفسه بحرية." : language === 'en' ? "Strict confidentiality gives teens a safe space to express themselves." : "La confidentialité stricte offre à l'ado l'espace pour s'exprimer."
+        },
+        {
+          question: language === 'ar' ? "هل تلاحظ استخداماً مفرطاً للشاشات؟" : language === 'en' ? "Do you notice excessive screen use?" : "Remarquez-vous un usage excessif des écrans ?",
+          options: language === 'ar'
+            ? ["نعم، يؤثر على نومه ودراسته", "نعم، ولكن ضمن الحدود المقبولة", "لا، استخدام طبيعي ومتوازن", "لا أعرف بدقة"]
+            : language === 'en'
+              ? ["Yes, affecting sleep and school", "Yes, but within limits", "No, balanced usage", "I don't know exactly"]
+              : ["Oui, affecte le sommeil et l'école", "Oui, mais dans la limite du raisonnable", "Non, usage équilibré", "Je ne sais pas précisément"],
+          teaser: language === 'ar' ? "التوازن الرقمي يعزز الصحة النفسية والقدرات الذهنية للشباب." : language === 'en' ? "Digital balance promotes positive mental health in young people." : "L'équilibre numérique favorise une bonne santé mentale."
         }
       ]
-    };
+    }[therapyKey as 'individuelle' | 'couple' | 'adolescents'] || [];
 
-    setActiveQuiz({ key: therapyKey, questions: questions.individuelle });
+    setActiveQuiz({
+      key: therapyKey,
+      title: therapyData.title,
+      iconColor: therapyData.iconColor,
+      questions
+    });
     setCurrentQuestionIdx(0);
     setQuizAnswers([]);
     setShowTeaser(false);
   };
 
-  const handleAnswer = (answer: string) => {
-    const currentQ = activeQuiz.questions[currentQuestionIdx];
-    const newAnswers = [...quizAnswers, answer];
-    setQuizAnswers(newAnswers);
-    setCurrentTeaserText(currentQ.teaser);
-    setShowTeaser(true);
+  const handleAnswerSelect = (answer: string) => {
+    const nextAnswers = [...quizAnswers, answer];
+    setQuizAnswers(nextAnswers);
 
-    setTimeout(() => {
-      setShowTeaser(false);
-      if (currentQuestionIdx + 1 < activeQuiz.questions.length) {
-        setCurrentQuestionIdx(currentQuestionIdx + 1);
-      } else {
-        setCurrentQuestionIdx(activeQuiz.questions.length); // Finished
-      }
-    }, 1200);
+    const currentQuestion = activeQuiz.questions[currentQuestionIdx];
+    if (currentQuestion.teaser) {
+      setCurrentTeaserText(currentQuestion.teaser);
+      setShowTeaser(true);
+    } else {
+      goToNextQuestion();
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-teal-500 selection:text-white font-sans antialiased overflow-x-hidden">
-      
-      {/* ─── Emergency & Crisis Top Banner ─── */}
-      <div className="bg-gradient-to-r from-teal-950 via-slate-900 to-indigo-950 border-b border-teal-900/40 text-xs py-2 px-4 text-center">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 text-slate-300">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-          </span>
-          <span>Besoin d'une écoute immédiate en cas d'urgence ?</span>
-          <span className="font-semibold text-teal-400 flex items-center gap-1">
-            <PhoneCall className="w-3.5 h-3.5 inline" /> Numéro Vert gratuit : 80 10 50 50 (Tunisie) / 15 (SAMU)
-          </span>
-        </div>
-      </div>
+  const goToNextQuestion = () => {
+    setShowTeaser(false);
+    if (currentQuestionIdx + 1 < activeQuiz.questions.length) {
+      setCurrentQuestionIdx(prev => prev + 1);
+    } else {
+      setCurrentQuestionIdx(activeQuiz.questions.length);
+    }
+  };
 
-      {/* ─── Global App Navbar ─── */}
+  const languages: Record<Language, { label: string; flag: string }> = {
+    fr: { label: "Français", flag: "🇫🇷" },
+    en: { label: "English", flag: "🇬🇧" },
+    ar: { label: "العربية", flag: "🇹🇳" }
+  };
+
+  const therapySections = [
+    {
+      id: "individuelle",
+      color: "bg-emerald-50",
+      borderColor: "border-emerald-100",
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+      btnBg: "bg-[#1B3A5C]",
+      btnText: "text-white",
+      image: "/therapy-individual.png"
+    },
+    {
+      id: "couple",
+      color: "bg-orange-50",
+      borderColor: "border-orange-100",
+      iconBg: "bg-orange-100",
+      iconColor: "text-orange-600",
+      btnBg: "bg-orange-500",
+      btnText: "text-white",
+      image: "/therapy-couple.png"
+    },
+    {
+      id: "adolescents",
+      color: "bg-rose-50",
+      borderColor: "border-rose-100",
+      iconBg: "bg-rose-100",
+      iconColor: "text-rose-600",
+      btnBg: "bg-rose-500",
+      btnText: "text-white",
+      image: "/therapy-adolescent.png"
+    }
+  ];
+
+  const whyChooseFeatures = [
+    {
+      icon: <Lock className="w-6 h-6" />,
+      title: t('why.confidentialityTitle'),
+      description: t('why.confidentialityDesc'),
+      color: "text-teal-500",
+      bg: "bg-teal-50",
+    },
+    {
+      icon: <UserCheck className="w-6 h-6" />,
+      title: t('why.psychologistsTitle'),
+      description: t('why.psychologistsDesc'),
+      color: "text-purple-500",
+      bg: "bg-purple-50",
+    },
+    {
+      icon: <MonitorSmartphone className="w-6 h-6" />,
+      title: t('why.onlineTitle'),
+      description: t('why.onlineDesc'),
+      color: "text-blue-500",
+      bg: "bg-blue-50",
+    },
+    {
+      icon: <CalendarCheck className="w-6 h-6" />,
+      title: t('why.easyTitle'),
+      description: t('why.easyDesc'),
+      color: "text-indigo-500",
+      bg: "bg-indigo-50",
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-white text-slate-800 overflow-x-hidden selection:bg-teal-200 selection:text-teal-900 font-outfit" dir={dir}>
+
       <Navbar />
 
-      <main className="pt-24 lg:pt-28">
+      {/* ════════════════════════════════════════
+          2. HERO SECTION
+      ════════════════════════════════════════ */}
+      <section className="relative pt-28 lg:pt-32 pb-16 lg:pb-20 px-6 overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-white">
+        {/* Subtle background decoration */}
+        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-teal-50/50 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-50/40 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* ========================================================================= */}
-        {/* 1. HERO SECTION                                                           */}
-        {/* ========================================================================= */}
-        <section className="relative px-6 pt-8 pb-20 lg:pt-14 lg:pb-32 overflow-hidden">
-          {/* Subtle Ambient Background Gradients */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-teal-600/15 via-cyan-500/10 to-indigo-600/15 blur-[140px] rounded-full pointer-events-none" />
-          <div className="absolute top-12 left-10 w-72 h-72 bg-teal-500/10 blur-[100px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
-
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-              
-              {/* Left Column: Headline & Action Triggers */}
-              <motion.div 
-                initial="hidden" 
-                animate="visible" 
-                variants={staggerContainer} 
-                className="lg:col-span-7 space-y-8 text-center lg:text-left"
-              >
-                {/* Trust Badge */}
-                <motion.div variants={fadeInUp} className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-semibold tracking-wide backdrop-blur-md">
-                  <Sparkles className="w-4 h-4 text-teal-400 animate-pulse" />
-                  <span>Plateforme N°1 de Psychothérapie en Ligne Sécurisée</span>
-                </motion.div>
-
-                {/* Primary Heading */}
-                <motion.h1 variants={fadeInUp} className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-                  Prenez soin de votre esprit,{" "}
-                  <span className="bg-gradient-to-r from-teal-300 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
-                    en toute sérénité et discrétion.
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+            {/* Left column — Text */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className={`order-2 lg:order-1 ${dir === 'rtl' ? 'lg:text-right' : 'lg:text-left'}`}
+            >
+              {/* Badge */}
+              <motion.div variants={fadeInUp} custom={0}>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 border border-purple-100 mb-6">
+                  <Sparkles className="w-4 h-4 text-purple-500" />
+                  <span className="text-xs font-semibold text-purple-700 tracking-wide">
+                    {t('hero.badge')}
                   </span>
-                </motion.h1>
-
-                {/* Subtitle */}
-                <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                  Consultez des psychologues agréés par visioconférence sécurisée, audio ou messagerie. 
-                  Sans déplacement, sans salle d'attente et avec option d'anonymat total.
-                </motion.p>
-
-                {/* Interactive CTAs */}
-                <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                  <Link
-                    href="/psychologists"
-                    className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white font-bold text-base shadow-xl shadow-teal-500/20 hover:shadow-teal-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
-                  >
-                    <span>Trouver mon psychologue</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-
-                  <button
-                    onClick={() => startQuiz('individuelle')}
-                    className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white font-semibold text-base backdrop-blur-md transition-all flex items-center justify-center gap-2.5 group"
-                  >
-                    <Sparkles className="w-4 h-4 text-teal-400 group-hover:rotate-12 transition-transform" />
-                    <span>Faire le test d'orientation (2 min)</span>
-                  </button>
-                </motion.div>
-
-                {/* Key Trust Checkmarks */}
-                <motion.div variants={fadeInUp} className="pt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-slate-900/80 text-xs text-slate-400">
-                  <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
-                    <span>100% Psychologues diplômés</span>
-                  </div>
-                  <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <EyeOff className="w-4 h-4 text-teal-400 shrink-0" />
-                    <span>Option d'anonymat garanti</span>
-                  </div>
-                  <div className="flex items-center gap-2 justify-center lg:justify-start col-span-2 sm:col-span-1">
-                    <CreditCard className="w-4 h-4 text-teal-400 shrink-0" />
-                    <span>Paiement TND & International</span>
-                  </div>
-                </motion.div>
+                </div>
               </motion.div>
 
-              {/* Right Column: Live Interactive Consultation Mockup Card */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.94, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="lg:col-span-5 relative"
+              {/* Heading */}
+              <motion.h1
+                variants={fadeInUp}
+                custom={1}
+                className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-extrabold tracking-tight leading-[1.15] mb-5 text-[#1B2559]"
               >
-                {/* Glowing Outer Ring */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/30 via-indigo-500/20 to-cyan-500/30 rounded-3xl blur-xl opacity-70 group-hover:opacity-100 transition duration-1000"></div>
+                {t('hero.title1')}{" "}
+                <br className="hidden sm:block" />
+                {t('hero.title2')}{" "}
+                <span className="text-[#2EC4B6] relative">
+                  {t('hero.trust')}
+                  <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none">
+                    <path d="M2 6C50 2 150 2 198 6" stroke="#2EC4B6" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
+                  </svg>
+                </span>
+              </motion.h1>
 
-                <div className="relative rounded-3xl bg-slate-900/90 border border-slate-800/80 p-6 backdrop-blur-2xl shadow-2xl space-y-6">
-                  
-                  {/* Top Mockup Bar */}
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                      <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                      <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                      <span className="text-xs font-mono text-slate-400 ml-2">Séance Vidéo Sécurisée • Monpsy</span>
+              {/* Description */}
+              <motion.p
+                variants={fadeInUp}
+                custom={2}
+                className="text-base lg:text-lg text-slate-500 max-w-lg mb-8 leading-relaxed font-light"
+              >
+                {t('hero.desc')}
+              </motion.p>
+
+              {/* Feature badges */}
+              <motion.div
+                variants={fadeInUp}
+                custom={3}
+                className={`flex flex-wrap gap-3 ${dir === 'rtl' ? 'justify-start' : ''}`}
+              >
+                {[
+                  { icon: <Shield className="w-4 h-4" />, label: t('hero.confidential') },
+                  { icon: <Award className="w-4 h-4" />, label: t('hero.certified') },
+                  { icon: <Lock className="w-4 h-4" />, label: t('hero.secure') },
+                ].map((badge) => (
+                  <div
+                    key={badge.label}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm text-sm font-medium text-slate-700 hover:border-teal-200 hover:shadow-md transition-all"
+                  >
+                    <span className="text-[#2EC4B6]">{badge.icon}</span>
+                    {badge.label}
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* Right column — Illustration */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="order-1 lg:order-2 relative flex items-center justify-center"
+            >
+              {/* Floating icons around the illustration */}
+              <div className="absolute -top-2 right-1/4 z-20 animate-float">
+                <div className="w-12 h-12 rounded-2xl bg-[#7C3AED] shadow-lg shadow-purple-200 flex items-center justify-center">
+                  <Video className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <div className="absolute top-1/4 -right-2 lg:right-4 z-20 animate-float-delayed">
+                <div className="w-10 h-10 rounded-xl bg-[#2EC4B6] shadow-lg shadow-teal-200 flex items-center justify-center">
+                  <MessageSquare className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="absolute bottom-1/4 -left-2 lg:left-8 z-20 animate-float-slow">
+                <div className="w-10 h-10 rounded-xl bg-blue-500 shadow-lg shadow-blue-200 flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-white" />
+                </div>
+              </div>
+
+              {/* Main illustration */}
+              <div className="relative w-full max-w-md lg:max-w-lg">
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-100/40 via-purple-100/30 to-blue-100/40 rounded-[2rem] blur-xl" />
+                <Image
+                  src="/hero-illustration.png"
+                  alt="Illustration d'une salle de thérapie confortable"
+                  width={520}
+                  height={420}
+                  className="relative z-10 w-full h-auto object-contain drop-shadow-xl"
+                  priority
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          3. MOTIVATIONAL BANNER
+      ════════════════════════════════════════ */}
+      <section className="relative py-16 md:py-20 px-6 bg-gradient-to-r from-slate-50 via-[#F0EDFF] to-slate-50 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-100/30 via-transparent to-transparent pointer-events-none" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto text-center relative z-10"
+        >
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1B2559] leading-snug">
+            {t('banner.quote')}
+          </h2>
+        </motion.div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          4. THERAPY TYPES SECTION
+      ════════════════════════════════════════ */}
+      <section className="py-20 md:py-28 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          {/* Section heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1B2559]">
+              {t('therapy.title')}
+            </h2>
+          </motion.div>
+
+          {/* Cards — 2 top, 1 centered bottom */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {therapySections.slice(0, 2).map((style, idx) => {
+              const isExpanded = expandedSection[style.id];
+              const info = {
+                title: t(`therapy.types.${style.id}.title`),
+                desc: t(`therapy.types.${style.id}.desc`),
+                points: t(`therapy.types.${style.id}.points`) as string[]
+              };
+              const visiblePoints = isExpanded ? info.points : info.points.slice(0, 5);
+
+              return (
+                <motion.div
+                  key={style.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ duration: 0.5, delay: idx * 0.15 }}
+                  className={`relative rounded-3xl ${style.color} border ${style.borderColor} p-7 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}
+                >
+                  <div>
+                    {/* Illustration */}
+                    <div className="flex justify-end mb-4">
+                      <div className="w-28 h-28 relative">
+                        <Image
+                          src={style.image}
+                          alt={info.title}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Lock className="w-3 h-3" /> Chiffrement E2E
-                    </span>
+
+                    {/* Content */}
+                    <h3 className="text-xl font-bold text-[#1B2559] mb-2">{info.title}</h3>
+                    <p className="text-sm text-slate-500 mb-4 leading-relaxed">{info.desc}</p>
+
+                    <ul className="space-y-2 mb-6">
+                      {visiblePoints.map((point) => (
+                        <li key={point} className="flex items-center gap-2.5 text-sm text-slate-600">
+                          <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${style.iconColor}`} />
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  {/* Simulated Video Feeds */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Psychologist Box */}
-                    <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-slate-950 border border-slate-800 flex flex-col justify-between p-3">
-                      <Image 
-                        src="https://images.unsplash.com/photo-1594824813581-229d4791a823?auto=format&fit=crop&q=80&w=600" 
-                        alt="Psychologue en séance" 
-                        fill 
-                        className="object-cover opacity-80"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
-                      <div className="relative z-10 self-end px-2 py-0.5 rounded-md bg-emerald-500/80 text-[10px] font-bold text-white flex items-center gap-1">
-                        <Activity className="w-3 h-3 animate-pulse" /> HD Direct
-                      </div>
-                      <div className="relative z-10">
-                        <p className="text-xs font-semibold text-white">Dr. Cyrine Ben Salem</p>
-                        <p className="text-[10px] text-teal-300">Psychothérapeute</p>
-                      </div>
-                    </div>
-
-                    {/* Patient / Waveform Box */}
-                    <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-gradient-to-br from-slate-950 to-indigo-950/70 border border-slate-800 flex flex-col items-center justify-center p-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/40 text-teal-300 flex items-center justify-center mb-2">
-                        <EyeOff className="w-6 h-6" />
-                      </div>
-                      <span className="text-xs font-semibold text-white">Patient (Mode Discret)</span>
-                      <span className="text-[10px] text-slate-400 mt-0.5">Microphone actif • Caméra masquée</span>
-                      
-                      {/* Fake Audio Waveform */}
-                      <div className="flex items-center gap-1 mt-3">
-                        {[40, 70, 30, 90, 60, 100, 45, 80, 50].map((h, idx) => (
-                          <span 
-                            key={idx} 
-                            style={{ height: `${h}%` }}
-                            className="w-1 bg-teal-400/80 rounded-full animate-pulse"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Booking Snippet Inside Card */}
-                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 space-y-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Prochain créneau disponible :</span>
-                      <span className="font-semibold text-teal-400 flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" /> Aujourd'hui à 16h30
-                      </span>
-                    </div>
-                    <Link
-                      href="/psychologists"
-                      className="w-full py-2.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-300 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      onClick={() => toggleSection(style.id)}
+                      className="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-all flex items-center gap-1"
                     >
-                      <span>Sélectionner ce créneau (Dès 65 TND)</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
+                      {isExpanded ? t('therapy.less') : t('therapy.more')}
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    </button>
+                    <button
+                      onClick={() => startQuiz(style.id, info)}
+                      className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold ${style.btnBg} ${style.btnText} hover:opacity-90 transition-all shadow-md`}
+                    >
+                      {t('therapy.startTest')}
+                      <ArrowRight className={`w-3.5 h-3.5 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    </button>
                   </div>
-
-                </div>
-              </motion.div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 2. STATS & RECOGNITION RIBBON                                             */}
-        {/* ========================================================================= */}
-        <section className="border-y border-slate-900 bg-slate-950/60 backdrop-blur-md py-10 px-6">
-          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="space-y-1">
-              <p className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">+3 200</p>
-              <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Consultations Réalisées</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl lg:text-4xl font-extrabold text-teal-400 tracking-tight">98.6%</p>
-              <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Satisfaction Patients</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">100%</p>
-              <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Psychologues Diplômés</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-3xl lg:text-4xl font-extrabold text-teal-400 tracking-tight">&lt; 24h</p>
-              <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Délai Moyen de Prise de RDV</p>
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 3. INTERACTIVE TOPIC / SYMPTOM SELECTOR (SMART MATCHING)                 */}
-        {/* ========================================================================= */}
-        <section className="py-20 px-6 max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-teal-400">Orientation Personnalisée</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Pour quel motif souhaitez-vous être accompagné ?
-            </p>
-            <p className="text-slate-400 text-sm sm:text-base">
-              Sélectionnez votre besoin principal pour découvrir immédiatement les praticiens les plus qualifiés.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10">
-            {topicsList.map((topic) => {
-              const Icon = topic.icon;
-              const isSelected = selectedTopic === topic.id;
-              return (
-                <button
-                  key={topic.id}
-                  onClick={() => setSelectedTopic(topic.id)}
-                  className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 ${
-                    isSelected 
-                      ? "bg-teal-500/15 border-teal-500 text-white shadow-lg shadow-teal-500/10 scale-105" 
-                      : "bg-slate-900/60 border-slate-850 hover:border-slate-750 text-slate-300 hover:text-white"
-                  }`}
-                >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                    isSelected ? "bg-teal-500 text-slate-950" : "bg-slate-800 text-teal-400"
-                  }`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-xs leading-snug">{topic.label}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">{topic.count}</p>
-                  </div>
-                </button>
+                </motion.div>
               );
             })}
           </div>
 
-          {/* Dynamic Match Preview Banner */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 text-center md:text-left">
-              <h3 className="text-lg font-bold text-white flex items-center justify-center md:justify-start gap-2">
-                <Sparkles className="w-5 h-5 text-teal-400" />
-                Des spécialistes certifiés sont disponibles dès aujourd'hui
-              </h3>
-              <p className="text-sm text-slate-400">
-                Nos psychologues utilisent des approches validées scientifiquement (TCC, Systémique, Écoute bienveillante).
-              </p>
-            </div>
-            <Link
-              href="/psychologists"
-              className="px-6 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-teal-500/20 transition-all flex items-center gap-2 whitespace-nowrap"
-            >
-              <span>Consulter les profils disponibles</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </section>
+          {/* Centered third card */}
+          <div className="flex justify-center mt-8">
+            {(() => {
+              const style = therapySections[2];
+              const isExpanded = expandedSection[style.id];
+              const info = {
+                title: t(`therapy.types.${style.id}.title`),
+                desc: t(`therapy.types.${style.id}.desc`),
+                points: t(`therapy.types.${style.id}.points`) as string[]
+              };
+              const visiblePoints = isExpanded ? info.points : info.points.slice(0, 5);
 
-        {/* ========================================================================= */}
-        {/* 4. HOW IT WORKS (3 SIMPLE STEPS)                                          */}
-        {/* ========================================================================= */}
-        <section className="py-20 px-6 bg-slate-900/40 border-t border-slate-900 relative">
-          <div className="max-w-7xl mx-auto space-y-16">
-            <div className="text-center max-w-3xl mx-auto space-y-4">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-teal-400">Processus Simple & Intuitif</h2>
-              <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Consulter un psychologue n'a jamais été aussi simple
-              </p>
-              <p className="text-slate-400 text-sm sm:text-base">
-                Trois étapes rapides pour démarrer votre thérapie en toute sérénité.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              
-              {/* Step 1 */}
-              <div className="p-8 rounded-3xl bg-slate-950 border border-slate-850 hover:border-teal-500/40 transition-all space-y-5 relative group">
-                <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-extrabold text-xl group-hover:scale-110 transition-transform">
-                  1
-                </div>
-                <h3 className="text-xl font-bold text-white">Choisissez votre praticien</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Parcourez les profils détaillés, les avis vérifiés, les spécialités et sélectionnez le créneau qui s'adapte à votre emploi du temps.
-                </p>
-                <div className="pt-2 text-xs text-teal-400 font-semibold flex items-center gap-1.5">
-                  <Check className="w-4 h-4" /> Filtres par tarif, langue & expertise
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="p-8 rounded-3xl bg-slate-950 border border-slate-850 hover:border-teal-500/40 transition-all space-y-5 relative group">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center font-extrabold text-xl group-hover:scale-110 transition-transform">
-                  2
-                </div>
-                <h3 className="text-xl font-bold text-white">Réservez & Payez en toute sécurité</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Confirmez votre consultation avec paiement sécurisé en Dinars Tunisiens (Konnect, Flouci, Paymee) ou par carte internationale (Stripe).
-                </p>
-                <div className="pt-2 text-xs text-indigo-400 font-semibold flex items-center gap-1.5">
-                  <Check className="w-4 h-4" /> Facturation automatique & reçus
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="p-8 rounded-3xl bg-slate-950 border border-slate-850 hover:border-teal-500/40 transition-all space-y-5 relative group">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-extrabold text-xl group-hover:scale-110 transition-transform">
-                  3
-                </div>
-                <h3 className="text-xl font-bold text-white">Consultez en Visioconférence HD</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Le jour J, rejoignez votre salle de consultation privée d'un simple clic depuis votre téléphone, tablette ou ordinateur sans rien installer.
-                </p>
-                <div className="pt-2 text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
-                  <Check className="w-4 h-4" /> Chiffrement WebRTC & Anonymat
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 5. FEATURED PSYCHOLOGISTS CARDS                                           */}
-        {/* ========================================================================= */}
-        <section className="py-20 px-6 max-w-7xl mx-auto space-y-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-3">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-teal-400">Équipe Médicale Qualifiée</h2>
-              <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Quelques-uns de nos psychologues certifiés
-              </p>
-              <p className="text-slate-400 text-sm sm:text-base max-w-2xl">
-                Tous nos praticiens sont titulaires d'un diplôme d'État et formés aux meilleures pratiques de thérapie en ligne.
-              </p>
-            </div>
-            <Link
-              href="/psychologists"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-teal-400 hover:text-teal-300 group"
-            >
-              <span>Voir tous les psychologues</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {FEATURED_PSYCHOLOGISTS.map((psy) => (
-              <div 
-                key={psy.id}
-                className="rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-teal-500/50 p-6 backdrop-blur-md transition-all flex flex-col justify-between space-y-6 group"
-              >
-                <div className="space-y-4">
-                  {/* Avatar & Header */}
-                  <div className="flex items-start gap-4">
-                    <div className="relative w-16 h-16 rounded-2xl overflow-hidden shrink-0 border border-slate-700">
-                      <Image src={psy.avatar} alt={psy.name} fill className="object-cover" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="font-bold text-white text-base">{psy.name}</h3>
-                        <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
-                      </div>
-                      <p className="text-xs text-slate-400">{psy.title}</p>
-                      <div className="flex items-center gap-2 pt-0.5">
-                        <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
-                          <Star className="w-3.5 h-3.5 fill-amber-400" /> {psy.rating}
-                        </span>
-                        <span className="text-[11px] text-slate-500">({psy.reviewsCount} avis)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Specialties Pills */}
-                  <div className="flex flex-wrap gap-1.5 pt-2">
-                    {psy.specialties.map((spec) => (
-                      <span key={spec} className="px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 text-[11px]">
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Next slot info */}
-                  <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-850 flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Disponibilité :</span>
-                    <span className="text-teal-400 font-semibold flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {psy.nextSlot}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bottom Pricing & CTA */}
-                <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-slate-400 block">Tarif séance</span>
-                    <span className="text-lg font-extrabold text-white">{psy.priceTND}</span>
-                    <span className="text-[11px] text-slate-500 ml-1.5">({psy.priceEUR})</span>
-                  </div>
-                  <Link
-                    href={`/psychologists/${psy.id}`}
-                    className="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-md shadow-teal-500/10 transition-all flex items-center gap-1.5"
-                  >
-                    <span>Prendre RDV</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 6. SECURITY & HEALTH COMPLIANCE PILLARS                                   */}
-        {/* ========================================================================= */}
-        <section className="py-20 px-6 bg-gradient-to-b from-slate-950 to-slate-900 border-t border-slate-900">
-          <div className="max-w-7xl mx-auto space-y-16">
-            <div className="text-center max-w-3xl mx-auto space-y-4">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-teal-400">Confidentialité & Déontologie</h2>
-              <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Une sécurité conçue selon les plus hauts standards médicaux
-              </p>
-              <p className="text-slate-400 text-sm sm:text-base">
-                Vos échanges et données personnelles de santé bénéficient d'une protection inviolable.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              
-              <div className="p-6 rounded-2xl bg-slate-950 border border-slate-850 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-white text-base">Secret Médical Garanti</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Conformité stricte avec les normes de l'INPDP (Tunisie) et du RGPD. Aucune donnée médicale n'est revendue.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-950 border border-slate-850 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                  <EyeOff className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-white text-base">Option 100% Anonyme</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Consultez sous pseudonyme si vous le souhaitez. Votre vie privée reste sous votre contrôle total.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-950 border border-slate-850 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-white text-base">Visioconférence Chiffrée</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Salles virtuelles éphémères générées par jetons cryptographiques. Aucun enregistrement n'est stocké.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-950 border border-slate-850 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-white text-base">Paiements Chiffrés</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Transactions bancaires cryptées SSL/TLS 256 bits via passerelles certifiées PCI-DSS.
-                </p>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 7. FREQUENTLY ASKED QUESTIONS (ACCORDION)                                 */}
-        {/* ========================================================================= */}
-        <section className="py-20 px-6 max-w-4xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-teal-400">Questions Fréquentes</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Tout ce que vous devez savoir
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {FAQS.map((faq, idx) => {
-              const isOpen = activeFaq === idx;
               return (
-                <div 
-                  key={idx}
-                  className="rounded-2xl bg-slate-900/60 border border-slate-850 overflow-hidden transition-all"
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className={`relative rounded-3xl ${style.color} border ${style.borderColor} p-7 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full max-w-md md:max-w-lg flex flex-col justify-between`}
                 >
-                  <button
-                    onClick={() => setActiveFaq(isOpen ? null : idx)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-white text-sm sm:text-base hover:text-teal-300 transition-colors"
-                  >
-                    <span>{faq.q}</span>
-                    <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? "rotate-180 text-teal-400" : ""}`} />
-                  </button>
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-850/60 pt-3"
-                      >
-                        {faq.a}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                  <div>
+                    {/* Illustration */}
+                    <div className="flex justify-end mb-4">
+                      <div className="w-28 h-28 relative">
+                        <Image
+                          src={style.image}
+                          alt={info.title}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-[#1B2559] mb-2">{info.title}</h3>
+                    <p className="text-sm text-slate-500 mb-4 leading-relaxed">{info.desc}</p>
+
+                    <ul className="space-y-2 mb-6">
+                      {visiblePoints.map((point) => (
+                        <li key={point} className="flex items-center gap-2.5 text-sm text-slate-600">
+                          <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${style.iconColor}`} />
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      onClick={() => toggleSection(style.id)}
+                      className="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-all flex items-center gap-1"
+                    >
+                      {isExpanded ? t('therapy.less') : t('therapy.more')}
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    </button>
+                    <button
+                      onClick={() => startQuiz(style.id, info)}
+                      className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold ${style.btnBg} ${style.btnText} hover:opacity-90 transition-all shadow-md`}
+                    >
+                      {t('therapy.startTest')}
+                      <ArrowRight className={`w-3.5 h-3.5 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                </motion.div>
               );
-            })}
+            })()}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ========================================================================= */}
-        {/* 8. FINAL HIGH-CONVERTING CTA BANNER                                       */}
-        {/* ========================================================================= */}
-        <section className="py-20 px-6 max-w-7xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-teal-900 via-indigo-950 to-slate-900 border border-teal-500/30 p-10 sm:p-16 text-center space-y-8 shadow-2xl">
-            {/* Background Light Orbs */}
-            <div className="absolute -top-24 -left-24 w-72 h-72 bg-teal-500/20 blur-3xl rounded-full pointer-events-none" />
-            <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-500/20 blur-3xl rounded-full pointer-events-none" />
-
-            <div className="max-w-3xl mx-auto space-y-4 relative z-10">
-              <span className="px-3.5 py-1 rounded-full bg-teal-400/20 text-teal-300 font-bold text-xs uppercase tracking-wider">
-                Faites le premier pas aujourd'hui
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                Votre bien-être mental mérite toute votre attention.
-              </h2>
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                Rejoignez des milliers de patients qui ont retrouvé sérénité et équilibre grâce aux psychologues certifiés de Monpsy.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10 pt-2">
-              <Link
-                href="/psychologists"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-extrabold text-base shadow-xl shadow-teal-950/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                <span>Prendre un rendez-vous</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/about"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-750 text-white font-semibold text-base transition-all flex items-center justify-center gap-2"
-              >
-                <span>Découvrir notre démarche</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-      </main>
-
-      {/* ─── Global App Footer ─── */}
-      <Footer />
-
-      {/* ========================================================================= */}
-      {/* 9. ORIENTATION QUIZ MODAL                                                 */}
-      {/* ========================================================================= */}
+      {/* ════════════════════════════════════════
+          EASY QUESTIONNAIRE MODAL WITH TEASERS
+      ════════════════════════════════════════ */}
       <AnimatePresence>
         {activeQuiz && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" dir={dir}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl p-6 sm:p-8 relative"
+              className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col"
             >
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-                <div className="flex items-center gap-2 text-teal-400 text-xs font-bold uppercase tracking-wider">
-                  <Sparkles className="w-4 h-4" />
-                  <span>Questionnaire d'Orientation</span>
+              {/* Modal Header */}
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-2.5">
+                  <span className={`w-2.5 h-2.5 rounded-full ${(activeQuiz.iconColor || 'text-teal-600').replace('text', 'bg')}`} />
+                  <h3 className="font-bold text-[#1B2559] text-base">{activeQuiz.title}</h3>
                 </div>
                 <button
                   onClick={() => setActiveQuiz(null)}
-                  className="p-1 rounded-full bg-slate-800 text-slate-400 hover:text-white"
+                  className="p-1.5 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  ✕
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {currentQuestionIdx < activeQuiz.questions.length ? (
-                <div className="space-y-6">
-                  {/* Progress Bar */}
-                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-teal-400 h-full transition-all duration-300"
-                      style={{ width: `${((currentQuestionIdx + 1) / activeQuiz.questions.length) * 100}%` }}
-                    />
-                  </div>
+              {/* Progress bar */}
+              <div className="h-1 w-full bg-slate-100">
+                <div
+                  className="h-full bg-teal-500 transition-all duration-300"
+                  style={{
+                    width: `${Math.min(100, ((currentQuestionIdx) / activeQuiz.questions.length) * 100)}%`
+                  }}
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <span className="text-xs text-slate-400 font-semibold">
-                      Question {currentQuestionIdx + 1} sur {activeQuiz.questions.length}
+              {/* Modal Body */}
+              <div className="p-6 md:p-8 flex-1 min-h-[360px] flex flex-col justify-center">
+                {showTeaser ? (
+                  /* Teaser Intermission Screen */
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-center space-y-6 py-6"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mx-auto border border-teal-100 animate-pulse">
+                      <Check className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-teal-600 uppercase tracking-wider">Note de notre équipe</h4>
+                      <p className="text-base font-medium text-slate-700 max-w-sm mx-auto leading-relaxed italic">
+                        &quot;{currentTeaserText}&quot;
+                      </p>
+                    </div>
+                    <button
+                      onClick={goToNextQuestion}
+                      className="px-6 py-2.5 rounded-full bg-[#1B3A5C] text-white text-sm font-semibold hover:opacity-90 shadow-md transition-all inline-flex items-center gap-1.5"
+                    >
+                      <span>Continuer</span>
+                      <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </motion.div>
+                ) : currentQuestionIdx < activeQuiz.questions.length ? (
+                  /* Question Display */
+                  <div className="space-y-6">
+                    <span className="text-xs font-semibold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {t('therapy.question')} {currentQuestionIdx + 1} {t('therapy.of')} {activeQuiz.questions.length}
                     </span>
-                    <h3 className="text-lg font-bold text-white">
+                    <h4 className="text-lg font-bold text-[#1B2559] leading-snug">
                       {activeQuiz.questions[currentQuestionIdx].question}
-                    </h3>
-                  </div>
+                    </h4>
 
-                  <div className="space-y-2.5">
-                    {activeQuiz.questions[currentQuestionIdx].options.map((opt: string, idx: number) => (
+                    <div className="grid gap-3 pt-2">
+                      {activeQuiz.questions[currentQuestionIdx].options.map((option: string) => (
+                        <button
+                          key={option}
+                          onClick={() => handleAnswerSelect(option)}
+                          className={`w-full p-4 rounded-xl text-left border border-slate-200 hover:border-teal-400 hover:bg-teal-50/30 text-sm font-medium text-slate-700 hover:text-teal-900 transition-all duration-150 flex items-center justify-between group ${dir === 'rtl' ? 'flex-row-reverse text-right' : ''
+                            }`}
+                        >
+                          {option}
+                          <ChevronRight className={`w-4 h-4 text-slate-300 group-hover:text-teal-500 transition-all ${dir === 'rtl' ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'
+                            }`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  /* Quiz Completed State */
+                  <div className="text-center py-6 space-y-6">
+                    <div className="w-16 h-16 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center mx-auto border border-teal-100">
+                      <Sparkles className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-xl font-bold text-[#1B2559]">{t('therapy.completed')}</h4>
+                      <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                        {t('therapy.completedDesc')}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-500 flex gap-2.5 items-start">
+                      <Info className="w-4.5 h-4.5 text-teal-500 shrink-0 mt-0.5" />
+                      <p className={`${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                        {t('therapy.infoText')}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 pt-4 justify-center">
                       <button
-                        key={idx}
-                        onClick={() => handleAnswer(opt)}
-                        className="w-full p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:bg-slate-850 text-left text-xs sm:text-sm font-medium text-slate-200 hover:text-white transition-all flex items-center justify-between group"
+                        onClick={() => setActiveQuiz(null)}
+                        className="px-6 py-2.5 rounded-full border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
                       >
-                        <span>{opt}</span>
-                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-teal-400 group-hover:translate-x-1 transition-all" />
+                        {t('therapy.close')}
                       </button>
-                    ))}
+                      <Link
+                        href="/register"
+                        className="px-6 py-2.5 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold shadow-lg shadow-purple-100 transition-all flex items-center gap-1.5"
+                      >
+                        {t('therapy.findPsy')}
+                        <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                      </Link>
+                    </div>
                   </div>
-
-                  {showTeaser && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-xs text-teal-300 text-center font-medium"
-                    >
-                      {currentTeaserText}
-                    </motion.div>
-                  )}
-                </div>
-              ) : (
-                /* Quiz Complete Screen */
-                <div className="text-center space-y-6 py-4">
-                  <div className="w-16 h-16 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="w-8 h-8" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-white">Test complété avec succès !</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Vos réponses indiquent qu'une thérapie d'accompagnement ciblée répond parfaitement à vos besoins actuels.
-                    </p>
-                  </div>
-                  <div className="pt-2">
-                    <Link
-                      href="/psychologists"
-                      onClick={() => setActiveQuiz(null)}
-                      className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-sm shadow-lg shadow-teal-400/10 transition-all"
-                    >
-                      <span>Découvrir les psychologues recommandés</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
+      {/* ════════════════════════════════════════
+          5. WHY CHOOSE MONPSY
+      ════════════════════════════════════════ */}
+      <section className="py-20 md:py-28 px-6 bg-slate-50/80">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1B2559]">
+              {t('why.title').split('?')[0]}{" "}
+              <span className="text-[#2EC4B6]">MonPsy</span> {t('why.title').includes('?') ? '?' : ''}
+            </h2>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-30px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {whyChooseFeatures.map((feature, idx) => (
+              <motion.div
+                key={feature.title}
+                variants={fadeInUp}
+                custom={idx}
+                className="bg-white rounded-2xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center group"
+              >
+                <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform`}>
+                  <span className={feature.color}>{feature.icon}</span>
+                </div>
+                <h3 className="text-base font-bold text-[#1B2559] mb-2">{feature.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          6. CTA SECTION
+      ════════════════════════════════════════ */}
+      <section className="py-20 px-6 bg-white">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6 }}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <div className="bg-gradient-to-br from-[#7C3AED] via-[#6D28D9] to-[#5B21B6] rounded-3xl p-10 md:p-16 relative overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 relative z-10">
+              {t('cta.title')}
+            </h2>
+            <p className="text-purple-200 text-base md:text-lg mb-8 max-w-xl mx-auto relative z-10">
+              {t('cta.desc')}
+            </p>
+            <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10 ${dir === 'rtl' ? 'flex-row-reverse' : ''}`}>
+              <Link
+                href="/register"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-[#7C3AED] font-bold text-sm hover:bg-purple-50 shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group"
+              >
+                {t('cta.start')}
+                <ArrowRight className={`w-4 h-4 group-hover:translate-x-0.5 transition-transform ${dir === 'rtl' ? 'rotate-180 group-hover:-translate-x-0.5' : ''}`} />
+              </Link>
+              <Link
+                href="/psychologists"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white/10 border border-white/20 text-white font-bold text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2"
+              >
+                {t('cta.browse')}
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          7. FOOTER
+      ════════════════════════════════════════ */}
+      <Footer />
     </div>
   );
 }
