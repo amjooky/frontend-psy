@@ -4,6 +4,7 @@ import SidebarLayout from '@/components/layout/SidebarLayout';
 import api from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, ExternalLink, FileText, Loader } from 'lucide-react';
+import { formatPrice } from '@/lib/format';
 
 export default function PatientBillingPage() {
   const queryClient = useQueryClient();
@@ -48,7 +49,7 @@ export default function PatientBillingPage() {
                       Dr. {invoice.appointment?.psychologist?.firstName} {invoice.appointment?.psychologist?.lastName}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
-                      Emise le {new Date(invoice.issuedAt).toLocaleDateString()} · {Number(invoice.total).toFixed(2)} {invoice.currency}
+                      Emise le {new Date(invoice.issuedAt).toLocaleDateString()} · {formatPrice(invoice.total, 80, 2)} {invoice.currency || 'TND'}
                     </p>
                   </div>
 

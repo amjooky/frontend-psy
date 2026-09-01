@@ -21,6 +21,7 @@ import {
 import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { haptic } from '@/lib/haptics';
+import { formatPrice } from '@/lib/format';
 
 type Provider = 'MOCK' | 'STRIPE' | 'PAYMEE';
 
@@ -295,9 +296,9 @@ function PaymentWizardContent() {
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Montant total</span>
               <div className="text-right">
                 <span className="text-2xl sm:text-3xl font-extrabold text-[#1B2559]">
-                  {Number(appt.price).toFixed(2)}
+                  {formatPrice(appt.price || appt.psychologist?.pricePerSession, 80, 2)}
                 </span>
-                <span className="text-xs font-bold text-slate-500 ml-1.5 uppercase">{appt.currency || 'TND'}</span>
+                <span className="text-xs font-bold text-slate-500 ml-1.5 uppercase">{appt.currency || appt.psychologist?.currency || 'TND'}</span>
               </div>
             </div>
 

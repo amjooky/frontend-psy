@@ -55,7 +55,8 @@ export default function AdminReviewsPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1 text-amber-500">
-                      {Array.from({ length: review.rating }).map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                      {Array.from({ length: Math.min(5, Math.max(1, Math.round(Number(review.rating) || 5))) }).map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                      <span className="text-xs font-bold text-slate-700 ml-1.5">{Number(review.rating) || 5}/5</span>
                     </div>
                     <p className="text-sm leading-6 text-slate-600">{review.comment || 'Aucun commentaire fourni.'}</p>
                   </div>

@@ -26,6 +26,7 @@ import api from '@/lib/api';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/components/providers/LanguageProvider';
+import { formatPrice, formatRating } from '@/lib/format';
 
 // Fallback profiles matching the sample directory entries
 const SAMPLE_PROFILES: Record<string, any> = {
@@ -257,13 +258,8 @@ export default function PsychologistProfile() {
   }
 
   const initial = psy.firstName?.replace(/^Dr\.?\s*/i, '')?.[0]?.toUpperCase() || 'P';
-  const ratingVal = typeof psy.rating === 'object' && psy.rating?.toNumber
-    ? psy.rating.toNumber().toFixed(1)
-    : parseFloat(String(psy.rating || 5.0)).toFixed(1);
-
-  const priceVal = typeof psy.pricePerSession === 'object' && psy.pricePerSession?.toNumber
-    ? psy.pricePerSession.toNumber().toFixed(2)
-    : parseFloat(String(psy.pricePerSession || 80)).toFixed(2);
+  const ratingVal = formatRating(psy.rating, 4.9);
+  const priceVal = formatPrice(psy.pricePerSession, 80, 2);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-outfit" dir={dir}>

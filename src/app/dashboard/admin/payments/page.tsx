@@ -5,21 +5,10 @@ import AdminSidebarLayout from '@/components/layout/AdminSidebarLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { DollarSign, X, AlertCircle, Download, ExternalLink } from 'lucide-react';
+import { formatPrice } from '@/lib/format';
 
-// Safely convert a Prisma Decimal object or raw number/string to a display string
-function safeDecimal(val: any, fallback = '—'): string {
-  if (val === null || val === undefined) return fallback;
-  if (typeof val === 'object' && val !== null) {
-    if (typeof val.toNumber === 'function') return val.toNumber().toFixed(2);
-    if (typeof val.toString === 'function') {
-      const s = val.toString();
-      const n = parseFloat(s);
-      return isNaN(n) ? fallback : n.toFixed(2);
-    }
-    return fallback;
-  }
-  const n = parseFloat(String(val));
-  return isNaN(n) ? fallback : n.toFixed(2);
+function safeDecimal(val: any, fallback = '80.00'): string {
+  return formatPrice(val, parseFloat(fallback) || 80, 2);
 }
 
 export default function AdminPayments() {

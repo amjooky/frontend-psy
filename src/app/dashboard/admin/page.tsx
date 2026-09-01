@@ -5,6 +5,7 @@ import AdminSidebarLayout from '@/components/layout/AdminSidebarLayout';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Activity, DollarSign, Users, Award, ShieldAlert, Check, X, ShieldCheck } from 'lucide-react';
+import { formatPrice } from '@/lib/format';
 
 export default function AdminOverview() {
   const [activeTab, setActiveTab] = useState<'STATS' | 'VERIFICATIONS'>('STATS');
@@ -51,7 +52,7 @@ export default function AdminOverview() {
             { label: 'Total Patients', value: report?.stats?.totalPatients || 0, icon: <Users className="w-5 h-5 text-blue-600" />, iconBg: 'bg-blue-50 border-blue-100' },
             { label: 'Verified Specialists', value: report?.stats?.totalPsychologists || 0, icon: <Award className="w-5 h-5 text-indigo-600" />, iconBg: 'bg-indigo-50 border-indigo-100' },
             { label: 'Active Consultation Sessions', value: report?.stats?.activeSessions || 0, icon: <Activity className="w-5 h-5 text-teal-600" />, iconBg: 'bg-teal-50 border-teal-100' },
-            { label: 'Platform Revenue', value: report?.stats?.totalRevenue ? `${Number(report.stats.totalRevenue).toFixed(0)} TND` : '0 TND', icon: <DollarSign className="w-5 h-5 text-purple-600" />, iconBg: 'bg-purple-50 border-purple-100' }
+            { label: 'Platform Revenue', value: `${formatPrice(report?.stats?.totalRevenue, 0, 0)} TND`, icon: <DollarSign className="w-5 h-5 text-purple-600" />, iconBg: 'bg-purple-50 border-purple-100' }
           ].map((m, idx) => (
             <div key={idx} className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all flex justify-between items-start">
               <div>

@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { PsychologistKycStepper } from '@/components/psychologist/PsychologistKycStepper';
+import { formatPrice, formatRating } from '@/lib/format';
 
 export default function PsychologistOverview() {
   const queryClient = useQueryClient();
@@ -157,8 +158,8 @@ export default function PsychologistOverview() {
           {[
             { label: 'Active Sessions', value: activeApptsCount, icon: <Video className="w-5 h-5 text-blue-600" />, iconBg: 'bg-blue-50 border-blue-100' },
             { label: 'Profile Status', value: stats?.status || 'PENDING', icon: <Award className="w-5 h-5 text-purple-600" />, iconBg: 'bg-purple-50 border-purple-100' },
-            { label: 'Hourly Rate', value: stats ? `${Number(stats.pricePerSession).toFixed(0)} ${stats.currency}` : '80 TND', icon: <DollarSign className="w-5 h-5 text-teal-600" />, iconBg: 'bg-teal-50 border-teal-100' },
-            { label: 'Rating Score', value: stats?.rating ? Number(stats.rating).toFixed(1) : '5.0', icon: <TrendingUp className="w-5 h-5 text-amber-600" />, iconBg: 'bg-amber-50 border-amber-100' }
+            { label: 'Hourly Rate', value: `${formatPrice(stats?.pricePerSession, 80, 0)} ${stats?.currency || 'TND'}`, icon: <DollarSign className="w-5 h-5 text-teal-600" />, iconBg: 'bg-teal-50 border-teal-100' },
+            { label: 'Rating Score', value: formatRating(stats?.rating, 5.0), icon: <TrendingUp className="w-5 h-5 text-amber-600" />, iconBg: 'bg-amber-50 border-amber-100' }
           ].map((m, idx) => (
             <div key={idx} className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all flex justify-between items-start">
               <div>

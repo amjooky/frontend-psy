@@ -6,6 +6,7 @@ import SecuritySetupCard from '@/components/security/SecuritySetupCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Save, User, Shield, CheckCircle2, Loader, Settings } from 'lucide-react';
+import { formatPrice } from '@/lib/format';
 
 export default function PsyProfileSettings() {
   const queryClient = useQueryClient();
@@ -22,8 +23,7 @@ export default function PsyProfileSettings() {
       const data = res.data?.data || res.data || {};
       setBio(data.biography || '');
       setSpecialties(data.specialties?.map((s: any) => s.specialty).join(', ') || '');
-      const parsed = Number(data.pricePerSession);
-      setPricePerSession(data.pricePerSession != null && !isNaN(parsed) ? String(parsed) : '80');
+      setPricePerSession(formatPrice(data.pricePerSession, 80, 0));
       return data;
     },
   });

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PsySidebarLayout from '@/components/layout/PsySidebarLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatPrice } from '@/lib/format';
 import {
   Calendar,
   Video,
@@ -347,9 +348,9 @@ export default function PsyAppointments() {
                           <Video className="w-3.5 h-3.5 text-blue-500" />
                           Consultation Vidéo HD
                         </span>
-                        {appt.price && (
+                        {(appt.price || appt.psychologist?.pricePerSession) && (
                           <span className="font-bold text-[#1B2559]">
-                            {Number(appt.price).toFixed(0)} {appt.currency || 'TND'}
+                            {formatPrice(appt.price || appt.psychologist?.pricePerSession, 80, 0)} {appt.currency || appt.psychologist?.currency || 'TND'}
                           </span>
                         )}
                       </div>

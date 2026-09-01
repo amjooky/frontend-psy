@@ -25,6 +25,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/components/providers/LanguageProvider';
+import { formatPrice, formatRating } from '@/lib/format';
 
 // Fallback verified psychologists in case the backend DB has no records yet
 const SAMPLE_PSYCHOLOGISTS = [
@@ -230,13 +231,8 @@ export default function PsychologistDirectory() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredList.map((psy: any) => {
                 const initial = psy.firstName?.replace(/^Dr\.?\s*/i, '')?.[0]?.toUpperCase() || 'P';
-                const formattedPrice = typeof psy.pricePerSession === 'object' && psy.pricePerSession?.toNumber
-                  ? psy.pricePerSession.toNumber().toFixed(2)
-                  : parseFloat(String(psy.pricePerSession || 80)).toFixed(2);
-
-                const ratingVal = typeof psy.rating === 'object' && psy.rating?.toNumber
-                  ? psy.rating.toNumber().toFixed(1)
-                  : parseFloat(String(psy.rating || 5.0)).toFixed(1);
+                const formattedPrice = formatPrice(psy.pricePerSession, 80, 2);
+                const ratingVal = formatRating(psy.rating, 4.9);
 
                 return (
                   <div
