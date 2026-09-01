@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { Lock, User, Eye, EyeOff, AlertCircle, Loader, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, AlertCircle, Loader, ShieldCheck, ArrowRight, Calendar } from 'lucide-react';
 import api from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 
@@ -19,8 +19,11 @@ const loginSchema = zod.object({
 
 type LoginFormValues = zod.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get('redirect');
+
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +59,10 @@ export default function LoginPage() {
 
       haptic.success();
 
-      if (user.role === 'PATIENT') {
+      // If a redirect URL was specified and the user is a patient, send them back to complete their action
+      if (redirectUrl && (user.role === 'PATIENT' || !user.role)) {
+        router.push(redirectUrl);
+      } else if (user.role === 'PATIENT') {
         router.push('/dashboard/patient');
       } else if (user.role === 'PSYCHOLOGIST') {
         router.push('/dashboard/psychologist');
@@ -72,113 +78,138 @@ export default function LoginPage() {
   };
 
   return (
+    <div className="w-full max-w-md bg-white border border-slate-150 rounded-3xl p-6 sm:p-8 relative z-10 shadow-xl">
+      {/* LOGO & TITLE */}
+      <div className="text-center mb-6">
+        <Link href="/" className="inline-flex justify-center mb-4 group">
+          <Image 
+            src="/logo.png" 
+            alt="MonPsy Logo" 
+            width={140} 
+            height={44} 
+            priority
+            style={{ width: 'auto', height: '44px' }}
+            className="object-contain group-hover:scale-105 transition-transform"
+          />
+        </Link>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B2559] tracking-tight">Bon retour</h2>
+        <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">
+          {redirectUrl ? "Connectez-vous pour finaliser votre consultation" : "Accédez à votre espace thérapeutique sécurisé"}
+        </p>
+      </div>
+
+      {/* REDIRECT BANNER NOTIFICATION */}
+      {redirectUrl && (
+        <div className="mb-5 p-3.5 rounded-2xl bg-teal-50 border border-teal-200/80 flex items-center gap-3 text-teal-800 text-xs font-semibold">
+          <Calendar className="w-4 h-4 text-teal-600 shrink-0" />
+          <span>Connexion requise pour réserver ou contacter le praticien.</span>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 text-rose-600 text-xs sm:text-sm">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <p>{errorMessage}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* EMAIL OR PSEUDO */}
+        <div>
+          <label className="block text-slate-700 text-xs sm:text-sm font-bold mb-1.5">Pseudo ou Adresse Email</label>
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              {...register('email')}
+              placeholder="ex: Serein_2026 ou vous@email.com"
+              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#2EC4B6] focus:bg-white focus:ring-2 focus:ring-teal-400/20 transition-all text-xs sm:text-sm placeholder:text-slate-400 text-slate-800 outline-none font-medium"
+            />
+          </div>
+          {errors.email && <p className="text-xs text-rose-500 mt-1">{errors.email.message}</p>}
+        </div>
+
+        {/* PASSWORD */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-slate-700 text-xs sm:text-sm font-bold">Mot de passe</label>
+            <Link href="/forgot-password" className="text-xs text-[#2EC4B6] hover:underline font-semibold">
+              Mot de passe oublié ?
+            </Link>
+          </div>
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
+              placeholder="••••••••"
+              className="w-full pl-11 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#2EC4B6] focus:bg-white focus:ring-2 focus:ring-teal-400/20 transition-all text-xs sm:text-sm placeholder:text-slate-400 text-slate-800 outline-none font-medium"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {errors.password && <p className="text-xs text-rose-500 mt-1">{errors.password.message}</p>}
+        </div>
+
+        {/* 2FA CODE (IF ENABLED) */}
+        {require2FA && (
+          <div>
+            <label className="block text-slate-700 text-xs sm:text-sm font-bold mb-1.5">Code à 6 chiffres (2FA)</label>
+            <input
+              type="text"
+              {...register('twoFactorCode')}
+              placeholder="123456"
+              maxLength={6}
+              className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#2EC4B6] font-mono text-center tracking-widest text-base"
+            />
+          </div>
+        )}
+
+        {/* SUBMIT BUTTON */}
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full py-3.5 rounded-2xl bg-[#1B2559] hover:bg-slate-800 disabled:bg-slate-300 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 mt-4 shadow-lg shadow-slate-900/10 transition-all active:scale-98"
+        >
+          {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+          {submitting ? 'Connexion...' : 'Se connecter'}
+        </button>
+      </form>
+
+      <div className="mt-6 pt-5 border-t border-slate-100 text-center space-y-2">
+        <p className="text-xs text-slate-500 font-medium">
+          Pas encore de compte ?{' '}
+          <Link 
+            href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'} 
+            className="text-[#2EC4B6] hover:underline font-bold"
+          >
+            Créer un espace privé en 1 clic
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-4 sm:p-6 relative font-outfit">
       {/* Background glow decoration */}
       <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-teal-100/40 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-100/40 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white border border-slate-150 rounded-3xl p-6 sm:p-8 relative z-10 shadow-xl">
-        {/* LOGO & TITLE */}
-        <div className="text-center mb-6">
-          <Link href="/" className="inline-flex justify-center mb-4 group">
-            <Image 
-              src="/logo.png" 
-              alt="MonPsy Logo" 
-              width={140} 
-              height={44} 
-              priority
-              style={{ width: 'auto', height: 'auto' }}
-              className="object-contain group-hover:scale-105 transition-transform"
-            />
-          </Link>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B2559] tracking-tight">Bon retour</h2>
-          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">Accédez à votre espace thérapeutique sécurisé</p>
+      <Suspense fallback={
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 flex items-center justify-center min-h-[300px]">
+          <Loader className="w-8 h-8 animate-spin text-[#2EC4B6]" />
         </div>
-
-        {errorMessage && (
-          <div className="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 text-rose-600 text-xs sm:text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <p>{errorMessage}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* EMAIL OR PSEUDO */}
-          <div>
-            <label className="block text-slate-700 text-xs sm:text-sm font-bold mb-1.5">Pseudo ou Adresse Email</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                {...register('email')}
-                placeholder="ex: Serein_2026 ou vous@email.com"
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#2EC4B6] focus:bg-white focus:ring-2 focus:ring-teal-400/20 transition-all text-xs sm:text-sm placeholder:text-slate-400 text-slate-800 outline-none font-medium"
-              />
-            </div>
-            {errors.email && <p className="text-xs text-rose-500 mt-1">{errors.email.message}</p>}
-          </div>
-
-          {/* PASSWORD */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-slate-700 text-xs sm:text-sm font-bold">Mot de passe</label>
-              <Link href="/forgot-password" className="text-xs text-[#2EC4B6] hover:underline font-semibold">
-                Mot de passe oublié ?
-              </Link>
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                placeholder="••••••••"
-                className="w-full pl-11 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#2EC4B6] focus:bg-white focus:ring-2 focus:ring-teal-400/20 transition-all text-xs sm:text-sm placeholder:text-slate-400 text-slate-800 outline-none font-medium"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {errors.password && <p className="text-xs text-rose-500 mt-1">{errors.password.message}</p>}
-          </div>
-
-          {/* 2FA CODE (IF ENABLED) */}
-          {require2FA && (
-            <div>
-              <label className="block text-slate-700 text-xs sm:text-sm font-bold mb-1.5">Code à 6 chiffres (2FA)</label>
-              <input
-                type="text"
-                {...register('twoFactorCode')}
-                placeholder="123456"
-                maxLength={6}
-                className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-[#2EC4B6] font-mono text-center tracking-widest text-base"
-              />
-            </div>
-          )}
-
-          {/* SUBMIT BUTTON */}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3.5 rounded-2xl bg-[#1B2559] hover:bg-slate-800 disabled:bg-slate-300 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 mt-4 shadow-lg shadow-slate-900/10 transition-all active:scale-98"
-          >
-            {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-            {submitting ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
-
-        <div className="mt-6 pt-5 border-t border-slate-100 text-center space-y-2">
-          <p className="text-xs text-slate-500 font-medium">
-            Pas encore de compte ?{' '}
-            <Link href="/register" className="text-[#2EC4B6] hover:underline font-bold">
-              Créer un espace privé en 1 clic
-            </Link>
-          </p>
-        </div>
-      </div>
+      }>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
