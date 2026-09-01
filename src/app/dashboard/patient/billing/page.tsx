@@ -53,39 +53,31 @@ export default function PatientBillingPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {invoice.pdfUrl ? (
-                      <a
-                        href={
-                          typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
-                            ? invoice.pdfUrl.replace(/http:\/\/localhost:\d+/, 'https://backend-psy-upv7.onrender.com')
-                            : invoice.pdfUrl
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Ouvrir le PDF
-                      </a>
-                    ) : null}
-
                     <button
                       onClick={async () => {
-                        const result = await generatePdf.mutateAsync(invoice.id);
-                        const rawUrl = result?.url || result;
-                        if (rawUrl) {
-                          const finalUrl =
-                            typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
-                              ? String(rawUrl).replace(/http:\/\/localhost:\d+/, 'https://backend-psy-upv7.onrender.com')
-                              : String(rawUrl);
-                          window.open(finalUrl, '_blank');
+                        try {
+                          const result = await generatePdf.mutateAsync(invoice.id);
+                          const rawUrl = result?.url || result;
+                          if (rawUrl) {
+                            const finalUrl =
+                              typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+                                ? String(rawUrl).replace(/http:\/\/localhost:\d+/, 'https://backend-psy-upv7.onrender.com')
+                                : String(rawUrl);
+                            window.open(finalUrl, '_blank');
+                          }
+                        } catch (e) {
+                          console.error('Invoice fetch error:', e);
                         }
                       }}
                       disabled={generatePdf.isPending}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#2EC4B6] px-4 py-2 text-sm font-semibold text-white hover:bg-[#25aa9d] disabled:opacity-60 shadow-xs"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#2EC4B6] hover:bg-[#25aa9d] px-4 py-2 text-sm font-semibold text-white shadow-xs disabled:opacity-60 transition-all"
                     >
-                      {generatePdf.isPending ? <Loader className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                      {invoice.pdfUrl ? 'Régénérer le PDF' : 'Générer le PDF'}
+                      {generatePdf.isPending ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <ExternalLink className="w-4 h-4" />
+                      )}
+                      <span>Ouvrir / Télécharger le PDF</span>
                     </button>
                   </div>
                 </div>
