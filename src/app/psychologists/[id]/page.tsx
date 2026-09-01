@@ -19,7 +19,8 @@ import {
   Award,
   CheckCircle2,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -122,6 +123,20 @@ export default function PsychologistProfile() {
       }
     },
   });
+
+  const { data: reviewsData } = useQuery({
+    queryKey: ['psychologist-reviews', id],
+    queryFn: async () => {
+      try {
+        const res = await api.get(`/psychologists/${id}/reviews`);
+        return res.data?.data || res.data || [];
+      } catch (e) {
+        return [];
+      }
+    },
+    enabled: !!id && !id.startsWith('sample-'),
+  });
+  const reviewsList: any[] = Array.isArray(reviewsData?.data) ? reviewsData.data : (Array.isArray(reviewsData) ? reviewsData : []);
 
   // Fallback to sample profile if ID matches or backend returns 404
   const psy = apiPsy || SAMPLE_PROFILES[id] || {
@@ -258,7 +273,8 @@ export default function PsychologistProfile() {
   }
 
   const initial = psy.firstName?.replace(/^Dr\.?\s*/i, '')?.[0]?.toUpperCase() || 'P';
-  const ratingVal = formatRating(psy.rating, 4.9);
+  const hasReviews = (psy.reviewCount ?? 0) > 0 && Number(psy.rating) > 0;
+  const ratingVal = hasReviews ? formatRating(psy.rating) : null;
   const priceVal = formatPrice(psy.pricePerSession, 80, 2);
 
   return (
@@ -295,11 +311,18 @@ export default function PsychologistProfile() {
                       Dr. {psy.firstName?.replace(/^Dr\.?\s*/i, '')} {psy.lastName}
                       <ShieldCheck className="w-5 h-5 text-[#2EC4B6]" />
                     </h1>
-                    <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 text-xs font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                      <span>{ratingVal}</span>
-                      <span className="text-slate-400 font-normal">({psy.reviewCount || 30}+ avis)</span>
-                    </div>
+                    {hasReviews ? (
+                      <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 text-xs font-bold">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span>{ratingVal}</span>
+                        <span className="text-slate-400 font-normal">({psy.reviewCount} avis)</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-100 text-xs font-semibold">
+                        <Sparkles className="w-3.5 h-3.5 text-teal-500" />
+                        <span>Nouveau praticien</span>
+                      </div>
+                    )}
                   </div>
 
                   <p className="text-sm text-[#7C3AED] font-semibold">
@@ -374,6 +397,67 @@ export default function PsychologistProfile() {
                     );
                   })}
                 </div>
+              </div>
+
+              {/* PATIENT REVIEWS */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-[#1B2559] flex items-center gap-2">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span>Avis & Retours des patients</span>
+                  </h2>
+                  {hasReviews && (
+                    <span className="text-xs font-semibold text-slate-500">
+                      {psy.reviewCount} avis certifié{psy.reviewCount > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+
+                {reviewsList.length > 0 ? (
+                  <div className="divide-y divide-slate-100 space-y-4 pt-1">
+                    {reviewsList.map((rev: any) => {
+                      const patientName = rev.isAnonymous
+                        ? "Patient vérifié (Anonyme)"
+                        : (rev.patient?.firstName ? `${rev.patient.firstName} ${rev.patient.lastName?.[0] || ''}.` : "Patient vérifié");
+                      const dateStr = rev.createdAt
+                        ? new Date(rev.createdAt).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+                        : '';
+
+                      return (
+                        <div key={rev.id} className="pt-4 first:pt-0 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-[#1B2559]">{patientName}</span>
+                              <span className="text-[10px] text-slate-400">• {dateStr}</span>
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  className={`w-3 h-3 ${
+                                    s <= rev.rating
+                                      ? 'fill-amber-400 text-amber-400'
+                                      : 'fill-slate-100 text-slate-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          {rev.comment && (
+                            <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line font-light">
+                              {rev.comment}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 px-4 bg-slate-50/70 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs">
+                    <p className="font-medium text-slate-600 mb-1">Ce praticien n&apos;a pas encore reçu d&apos;avis public.</p>
+                    <p className="text-[11px]">Un formulaire d&apos;évaluation vous sera directement proposé dès la fin de votre consultation.</p>
+                  </div>
+                )}
               </div>
 
               {/* CONFIDENTIALITY PROMISE */}

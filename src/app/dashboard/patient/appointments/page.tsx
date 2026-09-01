@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SidebarLayout from '@/components/layout/SidebarLayout';
 import { Calendar, Video, Clock, MessageSquare, AlertCircle, FileText, CheckCircle, Loader, Star, ArrowRight, XCircle } from 'lucide-react';
@@ -25,6 +25,22 @@ export default function AppointmentsPage() {
       return Array.isArray(result) ? result : [];
     },
   });
+
+  // Automatically open review modal if redirected with reviewApptId param
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Array.isArray(appointments) && appointments.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get('reviewApptId') || params.get('completedId');
+      if (targetId) {
+        const found = appointments.find((a: any) => a.id === targetId);
+        if (found) {
+          const doc = found.psychologist;
+          const docName = doc ? `Dr. ${doc.firstName} ${doc.lastName}` : 'votre praticien';
+          setReviewAppt({ id: found.id, doctorName: docName });
+        }
+      }
+    }
+  }, [appointments]);
 
   const cancelMutation = useMutation({
     mutationFn: async (payload: { id: string; reason: string }) => {

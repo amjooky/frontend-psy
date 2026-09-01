@@ -51,9 +51,14 @@ export function formatPrice(val: any, fallback: number = 80, decimals: number = 
   return formatDecimal(val, fallback, decimals);
 }
 
-export function formatRating(val: any, fallback: number = 5.0): string {
+export function formatRating(val: any, fallback: number = 0): string {
+  if (val === null || val === undefined || val === '') {
+    return fallback > 0 ? fallback.toFixed(1) : '0.0';
+  }
   const formatted = formatDecimal(val, fallback, 1);
   const n = parseFloat(formatted);
-  if (isNaN(n) || n <= 0) return fallback.toFixed(1);
+  if (isNaN(n) || n < 0) {
+    return fallback > 0 ? fallback.toFixed(1) : '0.0';
+  }
   return formatted;
 }

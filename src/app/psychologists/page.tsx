@@ -232,7 +232,8 @@ export default function PsychologistDirectory() {
               {filteredList.map((psy: any) => {
                 const initial = psy.firstName?.replace(/^Dr\.?\s*/i, '')?.[0]?.toUpperCase() || 'P';
                 const formattedPrice = formatPrice(psy.pricePerSession, 80, 2);
-                const ratingVal = formatRating(psy.rating, 4.9);
+                const hasReviews = (psy.reviewCount ?? 0) > 0 && Number(psy.rating) > 0;
+                const ratingVal = hasReviews ? formatRating(psy.rating) : null;
 
                 return (
                   <div
@@ -251,11 +252,18 @@ export default function PsychologistDirectory() {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50/80 px-3 py-1 rounded-full border border-amber-100 text-xs font-bold">
-                          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                          <span>{ratingVal}</span>
-                          <span className="text-slate-400 font-normal">({psy.reviewCount || 30}+)</span>
-                        </div>
+                        {hasReviews ? (
+                          <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50/80 px-3 py-1 rounded-full border border-amber-100 text-xs font-bold">
+                            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                            <span>{ratingVal}</span>
+                            <span className="text-slate-400 font-normal">({psy.reviewCount})</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100 text-xs font-semibold">
+                            <Sparkles className="w-3 h-3 text-teal-500" />
+                            <span>Nouveau</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Name & Title */}

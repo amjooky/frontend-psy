@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Loader, AlertCircle, PhoneOff, Video, Clock, ShieldCheck } from 'lucide-react';
 import api from '@/lib/api';
 import { BreathingWidget } from '@/components/session/BreathingWidget';
+import { PostSessionReviewModal } from '@/components/patient/PostSessionReviewModal';
 
 declare global {
   interface Window {
@@ -23,6 +24,26 @@ function ConsultationRoomContent() {
   const [waitingMessage, setWaitingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [doctorName, setDoctorName] = useState<string>('votre praticien');
+  const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
+
+  const handleSessionEnd = async () => {
+    try {
+      if (apiRef.current) {
+        apiRef.current.dispose();
+        apiRef.current = null;
+      }
+      await api.post(`/appointments/${appointmentId}/complete`).catch(() => {});
+    } catch {
+      // ignore
+    }
+    setShowReviewModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowReviewModal(false);
+    router.push('/dashboard/patient/appointments');
+  };
 
   useEffect(() => {
     if (!appointmentId) return;
@@ -34,7 +55,8 @@ function ConsultationRoomContent() {
       try {
         // 1. Get meeting credentials from backend (unpacked via NestJS TransformInterceptor format res.data.data)
         const res = await api.get(`/consultations/appointments/${appointmentId}/access`);
-        const { roomName, token, domain, userInfo } = res.data?.data || res.data || {};
+        const { roomName, token, domain, userInfo, doctorName: apiDocName } = res.data?.data || res.data || {};
+        if (apiDocName) setDoctorName(apiDocName);
 
         if (disposed) return;
 
@@ -98,7 +120,7 @@ function ConsultationRoomContent() {
             setStatus('ready');
 
             jitsiApi.addEventListener('videoConferenceLeft', () => {
-              router.push('/dashboard/patient/appointments');
+              handleSessionEnd();
             });
           } catch (err: any) {
             if (!disposed) {
@@ -272,6 +294,27 @@ function ConsultationRoomContent() {
     );
   }
 
+  if (showReviewModal) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center font-outfit text-slate-100 p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-5">
+          <ShieldCheck className="w-8 h-8 text-teal-400" />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-2">Séance terminée</h3>
+        <p className="text-slate-400 text-sm max-w-md leading-relaxed mb-6">
+          Merci pour votre consultation. Votre avis nous aide à maintenir un accompagnement bienveillant et sécurisé.
+        </p>
+        <PostSessionReviewModal
+          isOpen={showReviewModal}
+          appointmentId={appointmentId}
+          doctorName={doctorName}
+          onClose={handleModalClose}
+          onSubmitted={handleModalClose}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-screen h-screen bg-slate-950 font-outfit">
       <header className="h-14 border-b border-slate-900 bg-slate-950 px-6 flex items-center justify-between shrink-0">
@@ -285,10 +328,7 @@ function ConsultationRoomContent() {
           </span>
         </div>
         <button
-          onClick={() => {
-            if (apiRef.current) apiRef.current.executeCommand('hangup');
-            router.push('/dashboard/patient/appointments');
-          }}
+          onClick={handleSessionEnd}
           className="px-4 py-2 rounded-xl bg-red-950/20 border border-red-900/30 hover:bg-red-900/20 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
         >
           <PhoneOff className="w-4 h-4" />

@@ -22,6 +22,18 @@ function PsyConsultationRoomContent() {
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
 
+  const handleEndSession = async () => {
+    try {
+      if (apiRef.current) {
+        apiRef.current.executeCommand('hangup');
+      }
+      await api.post(`/appointments/${appointmentId}/complete`).catch(() => {});
+    } catch {
+      // ignore
+    }
+    router.push('/dashboard/psychologist');
+  };
+
   useEffect(() => {
     if (!appointmentId) return;
 
@@ -100,7 +112,7 @@ function PsyConsultationRoomContent() {
             });
 
             jitsiApi.addEventListener('videoConferenceLeft', () => {
-              router.push('/dashboard/psychologist');
+              handleEndSession();
             });
           } catch (err: any) {
             if (!disposed) setError('Impossible de démarrer l’interface vidéo. Vérifiez votre matériel de communication.');
@@ -217,10 +229,7 @@ function PsyConsultationRoomContent() {
           </span>
         </div>
         <button
-          onClick={() => {
-            if (apiRef.current) apiRef.current.executeCommand('hangup');
-            router.push('/dashboard/psychologist');
-          }}
+          onClick={handleEndSession}
           className="px-4 py-2 rounded-xl bg-red-950/20 border border-red-900/30 hover:bg-red-900/20 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
         >
           <PhoneOff className="w-4 h-4" />
