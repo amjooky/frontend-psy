@@ -16,7 +16,8 @@ export function UpcomingSessionBanner() {
     queryFn: async () => {
       try {
         const res = await api.get('/appointments', { params: { limit: 5 } });
-        return res.data?.data?.data || [];
+        const result = res.data?.data?.data ?? res.data?.data ?? res.data ?? [];
+        return Array.isArray(result) ? result : [];
       } catch {
         return [];
       }

@@ -20,11 +20,12 @@ export default function PatientOverview() {
     },
   });
 
-  const { data: appointments, isLoading: apptsLoading } = useQuery({
+  const { data: appointments = [], isLoading: apptsLoading } = useQuery({
     queryKey: ['patient-appointments'],
     queryFn: async () => {
       const res = await api.get('/appointments', { params: { limit: 3 } });
-      return res.data?.data?.data || [];
+      const result = res.data?.data?.data ?? res.data?.data ?? res.data ?? [];
+      return Array.isArray(result) ? result : [];
     },
   });
 
@@ -188,7 +189,7 @@ export default function PatientOverview() {
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mon Suivi Thérapeutique</h3>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60">
                 <div className="text-3xl font-extrabold text-[#1B2559]">{appointments?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium mt-1">Séance{appointments?.length > 1 ? 's' : ''} au total</div>
+                <div className="text-xs text-slate-500 font-medium mt-1">Séance{(appointments?.length ?? 0) > 1 ? 's' : ''} au total</div>
               </div>
 
               <div className="pt-2">

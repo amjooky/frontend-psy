@@ -21,7 +21,8 @@ export default function AppointmentsPage() {
     queryKey: ['patient-appointments-list'],
     queryFn: async () => {
       const res = await api.get('/appointments');
-      return res.data?.data?.data || res.data || [];
+      const result = res.data?.data?.data ?? res.data?.data ?? res.data ?? [];
+      return Array.isArray(result) ? result : [];
     },
   });
 

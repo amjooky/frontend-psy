@@ -74,7 +74,8 @@ function PaymentWizardContent() {
     queryKey: ['payment-appointment', appointmentId],
     queryFn: async () => {
       const res = await api.get(`/appointments`);
-      const apptList = res.data?.data?.data || [];
+      const result = res.data?.data?.data ?? res.data?.data ?? res.data ?? [];
+      const apptList = Array.isArray(result) ? result : [];
       return apptList.find((a: any) => a.id === appointmentId);
     },
     enabled: !!appointmentId,
