@@ -7,15 +7,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation, Language } from '@/components/providers/LanguageProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { 
-  Menu, 
-  X, 
-  ArrowRight, 
-  Shield, 
-  Calendar, 
-  MessageSquare, 
-  Video, 
-  Users, 
+import {
+  Menu,
+  X,
+  ArrowRight,
+  Shield,
+  Calendar,
+  MessageSquare,
+  Video,
+  Users,
   Award,
   CheckCircle2,
   Lock,
@@ -49,14 +49,14 @@ export default function LandingPage() {
   const { language, setLanguage, t, dir } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  
+
   // Quiz states
   const [activeQuiz, setActiveQuiz] = useState<any | null>(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
   const [showTeaser, setShowTeaser] = useState(false);
   const [currentTeaserText, setCurrentTeaserText] = useState("");
-  
+
   // States to toggle expanded therapy points list
   const [expandedSection, setExpandedSection] = useState<Record<string, boolean>>({
     individuelle: false,
@@ -76,11 +76,11 @@ export default function LandingPage() {
       individuelle: [
         {
           question: language === 'ar' ? "ما هو السبب الرئيسي لزيارتك؟" : language === 'en' ? "What is the main reason for your visit?" : "Quel est le principal motif de votre démarche ?",
-          options: language === 'ar' 
+          options: language === 'ar'
             ? ["التعامل مع الضغوط أو القلق اليومي", "التغلب على فترة اكتئاب أو احتراق نفسي", "العمل على تقدير الذات", "تجاوز حالة حداد أو انفصال"]
             : language === 'en'
-            ? ["Managing daily stress or anxiety", "Overcoming a period of depression or burnout", "Working on self-esteem", "Navigating grief or separation"]
-            : ["Gérer le stress ou l'anxiété au quotidien", "Surmonter une période de dépression ou burn-out", "Travailler sur l'estime de soi", "Traverser un deuil ou une séparation"],
+              ? ["Managing daily stress or anxiety", "Overcoming a period of depression or burnout", "Working on self-esteem", "Navigating grief or separation"]
+              : ["Gérer le stress ou l'anxiété au quotidien", "Surmonter une période de dépression ou burn-out", "Travailler sur l'estime de soi", "Traverser un deuil ou une séparation"],
           teaser: language === 'ar' ? "تحديد الاحتياجات هو الخطوة الأولى والأهم في رحلة التعافي." : language === 'en' ? "Identifying your needs is the most important first step." : "Identifier vos besoins est la première étape essentielle."
         },
         {
@@ -88,8 +88,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["بضعة أيام أو أسابيع", "عدة أشهر", "أكثر من سنة", "تتكرر بشكل متقطع منذ فترة طويلة"]
             : language === 'en'
-            ? ["A few days or weeks", "Several months", "Over a year", "On and off for a long time"]
-            : ["Quelques jours ou semaines", "Plusieurs mois", "Plus d'un an", "De façon intermittente depuis longtemps"],
+              ? ["A few days or weeks", "Several months", "Over a year", "On and off for a long time"]
+              : ["Quelques jours ou semaines", "Plusieurs mois", "Plus d'un an", "De façon intermittente depuis longtemps"],
           teaser: language === 'ar' ? "الاعتراف بالصعوبات هو نصف الطريق نحو الحل." : language === 'en' ? "Acknowledging struggles is halfway to finding a solution." : "Reconnaître ses difficultés est à mi-chemin de la solution."
         },
         {
@@ -97,8 +97,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، بشكل كبير جداً", "نعم، بشكل متوسط", "قليلاً فقط", "لا تؤثر تقريباً"]
             : language === 'en'
-            ? ["Yes, significantly", "Yes, moderately", "Only slightly", "Hardly at all"]
-            : ["Oui, de manière significative", "Oui, modérément", "Seulement un peu", "Presque pas du tout"],
+              ? ["Yes, significantly", "Yes, moderately", "Only slightly", "Hardly at all"]
+              : ["Oui, de manière significative", "Oui, modérément", "Seulement un peu", "Presque pas du tout"],
           teaser: language === 'ar' ? "نحن هنا لمساعدتك على استعادة توازن حياتك اليومية." : language === 'en' ? "We are here to help you restore balance in your daily life." : "Nous sommes là pour vous aider à retrouver l'équilibre au quotidien."
         },
         {
@@ -106,8 +106,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، بانتظام", "نعم، ولكن بشكل متقطع", "لا، هذه المرة الأولى"]
             : language === 'en'
-            ? ["Yes, regularly", "Yes, occasionally", "No, this is my first time"]
-            : ["Oui, régulièrement", "Oui, mais de façon occasionnelle", "Non, c'est ma première fois"],
+              ? ["Yes, regularly", "Yes, occasionally", "No, this is my first time"]
+              : ["Oui, régulièrement", "Oui, mais de façon occasionnelle", "Non, c'est ma première fois"],
           teaser: language === 'ar' ? "سواء كانت تجربتك الأولى أو لا، نحن نضمن لك رعاية مخصصة." : language === 'en' ? "Whether it's your first time or not, we guarantee personalized care." : "Que ce soit votre première fois ou non, nous garantissons des soins personnalisés."
         },
         {
@@ -115,8 +115,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["الشعور براحة أكبر وتخفيف التوتر", "فهم أفضل لمشاعري وسلوكي", "تحسين علاقاتي مع الآخرين", "الحصول على دعم في قرار مهم"]
             : language === 'en'
-            ? ["Feeling more relaxed and relieved of stress", "Better understanding of my emotions", "Improving relationships with others", "Getting support for an important decision"]
-            : ["Me sentir plus apaisé et libéré du stress", "Mieux comprendre mes émotions", "Améliorer mes relations avec les autres", "Obtenir du soutien pour une décision importante"],
+              ? ["Feeling more relaxed and relieved of stress", "Better understanding of my emotions", "Improving relationships with others", "Getting support for an important decision"]
+              : ["Me sentir plus apaisé et libéré du stress", "Mieux comprendre mes émotions", "Améliorer mes relations avec les autres", "Obtenir du soutien pour une décision importante"],
           teaser: language === 'ar' ? "وضع أهداف واضحة يسرع من تحقيق النتائج الإيجابية." : language === 'en' ? "Setting clear goals accelerates positive results." : "Définir des objectifs clairs accélère les résultats positifs."
         },
         {
@@ -124,8 +124,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["جلسة فيديو عن بعد (موصى بها)", "مكالمة صوتية فقط", "محادثة كتابية مشفرة"]
             : language === 'en'
-            ? ["Online video session (Recommended)", "Audio call only", "Encrypted text chat"]
-            : ["Consultation Vidéo (Recommandé)", "Appel audio uniquement", "Chat écrit sécurisé"],
+              ? ["Online video session (Recommended)", "Audio call only", "Encrypted text chat"]
+              : ["Consultation Vidéo (Recommandé)", "Appel audio uniquement", "Chat écrit sécurisé"],
           teaser: language === 'ar' ? "المرونة والراحة هما سر نجاح استشاراتنا." : language === 'en' ? "Flexibility and convenience are the keys to successful consultations." : "La flexibilité et le confort sont les clés d'une consultation réussie."
         }
       ],
@@ -135,8 +135,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["أقل من 6 أشهر", "بين 6 أشهر وسنتين", "عدة سنوات", "نتيجة حدث طارئ مؤخراً"]
             : language === 'en'
-            ? ["Less than 6 months", "Between 6 months and 2 years", "Several years", "Triggered by a recent event"]
-            : ["Moins de 6 mois", "Entre 6 mois et 2 ans", "Plusieurs années", "Suite à un événement déclencheur récent"],
+              ? ["Less than 6 months", "Between 6 months and 2 years", "Several years", "Triggered by a recent event"]
+              : ["Moins de 6 mois", "Entre 6 mois et 2 ans", "Plusieurs années", "Suite à un événement déclencheur récent"],
           teaser: language === 'ar' ? "جميع العلاقات تمر بفترات حرجة، والبحث عن حل هو علامة قوة." : language === 'en' ? "All relationships face challenges; seeking support is a sign of strength." : "Toutes les relations traversent des crises ; chercher de l'aide est un signe de force."
         },
         {
@@ -144,8 +144,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، غالباً", "أحياناً، ولكن سرعان ما يتحول لنقاش حاد", "لا، الحوار مقطوع تماماً", "نتجنب الحديث تماماً لتفادي الخلافات"]
             : language === 'en'
-            ? ["Yes, mostly", "Sometimes, but it quickly turns into an argument", "No, dialogue is completely cut off", "We avoid talking to prevent conflicts"]
-            : ["Oui, la plupart du temps", "Parfois, mais cela tourne vite à la dispute", "Non, le dialogue est complètement rompu", "Nous évitons de parler pour éviter les conflits"],
+              ? ["Yes, mostly", "Sometimes, but it quickly turns into an argument", "No, dialogue is completely cut off", "We avoid talking to prevent conflicts"]
+              : ["Oui, la plupart du temps", "Parfois, mais cela tourne vite à la dispute", "Non, le dialogue est complètement rompu", "Nous évitons de parler pour éviter les conflits"],
           teaser: language === 'ar' ? "إعادة بناء قنوات التواصل هي الركيزة الأولى للعلاج الزوجي." : language === 'en' ? "Rebuilding communication channels is the first pillar of couples therapy." : "Reconstruire les canaux de communication est le premier pilier de la thérapie."
         },
         {
@@ -153,8 +153,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، متفقان تماماً", "شريكي متردد ولكن موافق على التجربة", "لا، يرفض الفكرة حالياً", "لم نتحدث في هذا الموضوع بعد"]
             : language === 'en'
-            ? ["Yes, fully agreed", "My partner is hesitant but willing to try", "No, refuses the idea for now", "We haven't discussed this yet"]
-            : ["Oui, tout à fait d'accord", "Mon partenaire hésite mais accepte d'essayer", "Non, il/elle refuse pour l'instant", "Nous n'en avons pas encore parlé"],
+              ? ["Yes, fully agreed", "My partner is hesitant but willing to try", "No, refuses the idea for now", "We haven't discussed this yet"]
+              : ["Oui, tout à fait d'accord", "Mon partenaire hésite mais accepte d'essayer", "Non, il/elle refuse pour l'instant", "Nous n'en avons pas encore parlé"],
           teaser: language === 'ar' ? "يمكن بدء الجلسات بشكل فردي لمساعدتك على التعامل مع الوضع." : language === 'en' ? "Sessions can start individually to help you navigate the situation." : "Les séances peuvent commencer individuellement pour vous aider à gérer la situation."
         },
         {
@@ -162,8 +162,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["إيجاد حلول للخلافات المتكررة", "استعادة الثقة والحب المفقود", "تسهيل قرار الانفصال بشكل ودي", "تحسين التربية المشتركة للأطفال"]
             : language === 'en'
-            ? ["Resolving frequent arguments", "Restoring trust and reconnection", "Facilitating an amicable separation", "Improving co-parenting"]
-            : ["Résoudre les disputes fréquentes", "Restaurer la confiance et renouer le lien", "Faciliter une séparation à l'amiable", "Améliorer la coparentalité"],
+              ? ["Resolving frequent arguments", "Restoring trust and reconnection", "Facilitating an amicable separation", "Improving co-parenting"]
+              : ["Résoudre les disputes fréquentes", "Restaurer la confiance et renouer le lien", "Faciliter une séparation à l'amiable", "Améliorer la coparentalité"],
           teaser: language === 'ar' ? "تحديد هدف مشترك يساعد بشكل كبير في نجاح العملية العلاجية." : language === 'en' ? "Identifying a shared goal greatly supports the therapy process." : "Définir un objectif commun soutient grandement le processus."
         },
         {
@@ -171,8 +171,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، بشكل كبير", "قليلاً", "لا، هذا الجانب مستقر", "لا نرغب في الإجابة"]
             : language === 'en'
-            ? ["Yes, significantly", "Slightly", "No, this area is stable", "Prefer not to answer"]
-            : ["Oui, de manière significative", "Légèrement", "Non, cet aspect est préservé", "Ne souhaite pas répondre"],
+              ? ["Yes, significantly", "Slightly", "No, this area is stable", "Prefer not to answer"]
+              : ["Oui, de manière significative", "Légèrement", "Non, cet aspect est préservé", "Ne souhaite pas répondre"],
           teaser: language === 'ar' ? "الحميمية العاطفية والجسدية مرتبطان بشكل وثيق بنجاح العلاقة." : language === 'en' ? "Emotional and physical intimacy are closely linked in a relationship." : "L'intimité émotionnelle et physique sont étroitement liées."
         },
         {
@@ -180,8 +180,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، العمل أو المال", "نعم، العائلة أو الأقارب", "نعم، تربية الأطفال", "لا، المشاكل داخلية فقط"]
             : language === 'en'
-            ? ["Yes, work or finances", "Yes, family or in-laws", "Yes, raising children", "No, stressors are only internal"]
-            : ["Oui, le travail ou l'argent", "Oui, la famille ou l'entourage", "Oui, l'éducation des enfants", "Non, les tensions sont purement internes"],
+              ? ["Yes, work or finances", "Yes, family or in-laws", "Yes, raising children", "No, stressors are only internal"]
+              : ["Oui, le travail ou l'argent", "Oui, la famille ou l'entourage", "Oui, l'éducation des enfants", "Non, les tensions sont purement internes"],
           teaser: language === 'ar' ? "فهم الضغوط الخارجية يساعد على تخفيف اللوم المتبادل بين الشريكين." : language === 'en' ? "Understanding external stressors helps reduce mutual blame between partners." : "Comprendre les stress externes aide à réduire les reproches mutuels."
         }
       ],
@@ -191,8 +191,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["11 إلى 13 سنة", "14 إلى 16 سنة", "17 إلى 19 سنة"]
             : language === 'en'
-            ? ["11 to 13 years old", "14 to 16 years old", "17 to 19 years old"]
-            : ["11 à 13 ans", "14 à 16 ans", "17 à 19 ans"],
+              ? ["11 to 13 years old", "14 to 16 years old", "17 to 19 years old"]
+              : ["11 à 13 ans", "14 à 16 ans", "17 à 19 ans"],
           teaser: language === 'ar' ? "تختلف التحديات النفسية والاحتياجات بحسب الفئة العمرية للمراهق." : language === 'en' ? "Psychological challenges and needs vary by the teenager's age." : "Les défis psychologiques et les besoins varient selon l'âge."
         },
         {
@@ -200,8 +200,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["العزلة والانطواء المفرط", "العدوانية أو العصبية السريعة", "تراجع كبير في التحصيل الدراسي", "تغيرات في النوم أو الشهية"]
             : language === 'en'
-            ? ["Extreme isolation and withdrawal", "Aggressiveness or quick temper", "Drop in academic performance", "Changes in sleep or appetite"]
-            : ["Isolement et repli sur soi", "Agressivité ou irritabilité rapide", "Baisse des résultats scolaires", "Changements de sommeil/d'appétit"],
+              ? ["Extreme isolation and withdrawal", "Aggressiveness or quick temper", "Drop in academic performance", "Changes in sleep or appetite"]
+              : ["Isolement et repli sur soi", "Agressivité ou irritabilité rapide", "Baisse des résultats scolaires", "Changements de sommeil/d'appétit"],
           teaser: language === 'ar' ? "التغيرات المفاجئة في السلوك هي بمثابة نداء استغاثة غير مباشر." : language === 'en' ? "Sudden changes in behavior are often an indirect call for help." : "Les changements de comportement sont souvent un appel à l'aide."
         },
         {
@@ -209,8 +209,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["صعب جداً ومليء بالتوتر", "سطحي ونتجنب المواضيع الحساسة", "جيد في بعض الأحيان ومستحيل في أحيان أخرى", "شبه منعدم"]
             : language === 'en'
-            ? ["Very difficult and tense", "Superficial, avoiding sensitive topics", "Good at times, impossible at others", "Almost non-existent"]
-            : ["Très difficile et tendu", "Superficiel, on évite les sujets sensibles", "Bon par moments, impossible à d'autres", "Quasi inexistant"],
+              ? ["Very difficult and tense", "Superficial, avoiding sensitive topics", "Good at times, impossible at others", "Almost non-existent"]
+              : ["Très difficile et tendu", "Superficiel, on évite les sujets sensibles", "Bon par moments, impossible à d'autres", "Quasi inexistant"],
           teaser: language === 'ar' ? "العلاج يساعد في إيجاد حوار آمن وبناء بين الآباء والأبناء." : language === 'en' ? "Therapy helps rebuild safe and constructive dialogue within the family." : "La thérapie aide à retrouver un dialogue sécurisant et constructif."
         },
         {
@@ -218,8 +218,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، تنمر أو مشاكل مع الأصدقاء", "نعم، ضغط دراسي وخوف من الفشل", "نعم، صعوبة في التأقلم أو تكوين صداقات", "لا توجد مشاكل ظاهرة خارج المنزل"]
             : language === 'en'
-            ? ["Yes, bullying or friend issues", "Yes, academic stress and fear of failure", "Yes, trouble fitting in or making friends", "No obvious issues outside the home"]
-            : ["Oui, harcèlement ou soucis d'amis", "Oui, stress scolaire et peur de l'échec", "Oui, mal à s'adapter ou se faire des amis", "Pas de soucis apparents"],
+              ? ["Yes, bullying or friend issues", "Yes, academic stress and fear of failure", "Yes, trouble fitting in or making friends", "No obvious issues outside the home"]
+              : ["Oui, harcèlement ou soucis d'amis", "Oui, stress scolaire et peur de l'échec", "Oui, mal à s'adapter ou se faire des amis", "Pas de soucis apparents"],
           teaser: language === 'ar' ? "حماية المراهق ودعمه في بيئته الاجتماعية هي أولويتنا." : language === 'en' ? "Protecting and supporting teens in their social environment is our priority." : "Soutenir l'adolescent dans son environnement social est primordial."
         },
         {
@@ -227,8 +227,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، بطلب منه شخصياً", "موافق على التجربة بشرط الخصوصية", "متردد أو يرفض الفكرة", "لم نطرح عليه الفكرة بعد"]
             : language === 'en'
-            ? ["Yes, requested it themselves", "Agrees if privacy is guaranteed", "Hesitant or refuses the idea", "We haven't proposed it yet"]
-            : ["Oui, à sa propre demande", "D'accord si la confidentialité est garantie", "Hésitant ou refuse l'idée", "Nous ne lui avons pas proposé"],
+              ? ["Yes, requested it themselves", "Agrees if privacy is guaranteed", "Hesitant or refuses the idea", "We haven't proposed it yet"]
+              : ["Oui, à sa propre demande", "D'accord si la confidentialité est garantie", "Hésitant ou refuse l'idée", "Nous ne lui avons pas proposé"],
           teaser: language === 'ar' ? "سرية الجلسات تمنح المراهق الأمان الكامل للتعبير عن نفسه بحرية." : language === 'en' ? "Strict confidentiality gives teens a safe space to express themselves." : "La confidentialité stricte offre à l'ado l'espace pour s'exprimer."
         },
         {
@@ -236,8 +236,8 @@ export default function LandingPage() {
           options: language === 'ar'
             ? ["نعم، يؤثر على نومه ودراسته", "نعم، ولكن ضمن الحدود المقبولة", "لا، استخدام طبيعي ومتوازن", "لا أعرف بدقة"]
             : language === 'en'
-            ? ["Yes, affecting sleep and school", "Yes, but within limits", "No, balanced usage", "I don't know exactly"]
-            : ["Oui, affecte le sommeil et l'école", "Oui, mais dans la limite du raisonnable", "Non, usage équilibré", "Je ne sais pas précisément"],
+              ? ["Yes, affecting sleep and school", "Yes, but within limits", "No, balanced usage", "I don't know exactly"]
+              : ["Oui, affecte le sommeil et l'école", "Oui, mais dans la limite du raisonnable", "Non, usage équilibré", "Je ne sais pas précisément"],
           teaser: language === 'ar' ? "التوازن الرقمي يعزز الصحة النفسية والقدرات الذهنية للشباب." : language === 'en' ? "Digital balance promotes positive mental health in young people." : "L'équilibre numérique favorise une bonne santé mentale."
         }
       ]
@@ -390,7 +390,7 @@ export default function LandingPage() {
                 <span className="text-[#2EC4B6] relative">
                   {t('hero.trust')}
                   <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none">
-                    <path d="M2 6C50 2 150 2 198 6" stroke="#2EC4B6" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+                    <path d="M2 6C50 2 150 2 198 6" stroke="#2EC4B6" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
                   </svg>
                 </span>
               </motion.h1>
@@ -640,6 +640,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+
       {/* ════════════════════════════════════════
           EASY QUESTIONNAIRE MODAL WITH TEASERS
       ════════════════════════════════════════ */}
@@ -668,10 +669,10 @@ export default function LandingPage() {
 
               {/* Progress bar */}
               <div className="h-1 w-full bg-slate-100">
-                <div 
+                <div
                   className="h-full bg-teal-500 transition-all duration-300"
-                  style={{ 
-                    width: `${Math.min(100, ((currentQuestionIdx) / activeQuiz.questions.length) * 100)}%` 
+                  style={{
+                    width: `${Math.min(100, ((currentQuestionIdx) / activeQuiz.questions.length) * 100)}%`
                   }}
                 />
               </div>
@@ -718,14 +719,12 @@ export default function LandingPage() {
                         <button
                           key={option}
                           onClick={() => handleAnswerSelect(option)}
-                          className={`w-full p-4 rounded-xl text-left border border-slate-200 hover:border-teal-400 hover:bg-teal-50/30 text-sm font-medium text-slate-700 hover:text-teal-900 transition-all duration-150 flex items-center justify-between group ${
-                            dir === 'rtl' ? 'flex-row-reverse text-right' : ''
-                          }`}
+                          className={`w-full p-4 rounded-xl text-left border border-slate-200 hover:border-teal-400 hover:bg-teal-50/30 text-sm font-medium text-slate-700 hover:text-teal-900 transition-all duration-150 flex items-center justify-between group ${dir === 'rtl' ? 'flex-row-reverse text-right' : ''
+                            }`}
                         >
                           {option}
-                          <ChevronRight className={`w-4 h-4 text-slate-300 group-hover:text-teal-500 transition-all ${
-                            dir === 'rtl' ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'
-                          }`} />
+                          <ChevronRight className={`w-4 h-4 text-slate-300 group-hover:text-teal-500 transition-all ${dir === 'rtl' ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'
+                            }`} />
                         </button>
                       ))}
                     </div>
